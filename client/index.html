@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Muffin tanks</title>
+</head>
+<body>
+    <div id="create-dialog" style="background-color: var(--theme-normal)">
+        <h1>Muffin tanks (backup server)</h1>
+        <input placeholder="Game ID" class="text-input" id="game-id"></input>
+        <h2>Create game</h2>
+        <div>
+            <!--<button class="button-wide" onclick="createGameLocal()">Local multiplayer</button>-->
+            <button class="button-wide" onclick="createGame()">Create</button>
+        </div>
+        <h3>Join game</h3>
+        <div>
+            <button class="button-wide" onclick="startJoin()">Join</button>
+        </div>
+    </div>
+    <div id="join-dialog" style="display: none;">
+        <div style="max-width: 90vw; width: 20vmax;">
+            <h1 style="margin-bottom: 0">Customise tank</h1>
+            <h3 style="margin-bottom: 20vh;">Joining game '<span id="game-id-display"></span>'</h3>
+            <div id="tank-class-container">
+                <button onclick="changeTankClass(-1)">&lt;</button><span id="tank-class">Medium</span><button onclick="changeTankClass(1)">&gt;</button>
+            </div>
+            <div style="width: 100%; margin-bottom: 8px;">
+                <input id="tank-name" class="text-input" autocomplete="off" placeholder="Name"/><button id="tank-color-button" onclick="elTankColor.click()">Color</button><input style="display: none" id="tank-color" type="color" value="#ff0000" />
+            </div>
+            <button onclick="cancelJoin()" style="width: calc(30% - 8px);margin-right: 8px;">Back</button><button style="width: 70%" onclick="joinGame()" id="join-game-frfr">Join game</button>
+        </div>
+    </div>
+    <div id="help-dialog">
+        <div style="max-width: 90vw; width: 20vmax;">
+            <h1>Help</h1>
+            <h3>How to play</h3>
+            <p>
+                Use the WASD keys or arrow keys to move the tank. W and S (or up and down)
+                will move the tank forward and back, and A and D (or left and right) will spin
+                the tank. Use Space to fire
+            </p>
+            <h3>About</h3>
+            <p>
+                This game was made by CoderMuffin :D<br/><br/>
+                Muffin tanks is a 3D, online tanks game where you can shoot
+                each other and objects that are affected by physics, inspired
+                by Wii tanks.<br/><br/>
+                If you have found any bugs or have any questions or ideas for
+                the project, feel free to reach out to me at
+                <a href="mailto:codermuffin@gmail.com">codermuffin@gmail.com</a>
+            </p>
+            <button onclick="toggleHelp()">Close</button>
+        </div>
+    </div>
+    <div id="ping-container">
+        Ping: <span id="ping">???</span>ms
+    </div>
+    <div id="touch-controls" style="display: none">
+        <div></div>
+    </div>
+    <div id="loading">
+        <img src="https://codermuffin.com/codermuffin.png"/>
+    </div>
+    <div id="toast-container">
+    </div>
+    <div id="mobile-controls" style="display:none">
+        <div id="mobile-wasd-grid">
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+            <button></button>
+        </div>
+        <button id="mobile-button-shoot"></button>
+    </div>
+    <button onclick="toggleMobileControls()" id="enable-mobile-button" style="display:none">Mobile</button>
+    <button onclick="toggleHelp()" id="help-button">?</button>
+    
+    <script src="socket.io/socket.io.js"></script>
+    <script src="three.js"></script>
+    <script src="fontloader.js"></script>
+    <script src="objloader.js"></script>
+    <script src="textgeometry.js"></script>
+    <script src="roundedboxgeometry.js"></script>
+    <script src="ammo.js"></script>
+    <script src="util.js"></script>
+    <script src="physics.js"></script>
+    <script src="gameclient.js"></script>
+    <script src="gameserver.js"></script>
+    <script src="controls.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

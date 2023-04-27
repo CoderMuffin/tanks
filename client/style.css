@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;700&display=swap');
+* {
+    font-family: "Golos Text";
+}
+
+:root {
+    --theme-normal: #00c8ff;
+    --theme-dark: #00a0cd;
+    --wasd-grid-size: 7vw;
+}
+
+html, body {
+    touch-action: none;
+    overscroll-behavior: contain;
+}
+
+#mobile-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#mobile-controls button {
+    display: inline-block;
+    border: 4px solid #fffa;
+    background-color: transparent;
+    width: var(--wasd-grid-size);
+    height: var(--wasd-grid-size);
+    z-index: 50;
+    border-radius: 0;
+}
+
+#mobile-wasd-grid {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+#mobile-wasd-grid :nth-child(1) {
+    border-radius: 8px 0px 0px 0px;
+    border-width: 8px 4px 4px 8px;
+}
+#mobile-wasd-grid :nth-child(2) {
+    border-top-width: 8px;
+}
+#mobile-wasd-grid :nth-child(3) {
+    border-radius: 0px 8px 0px 0px;
+    border-width: 8px 8px 4px 4px;
+}
+#mobile-wasd-grid :nth-child(4) {
+    border-left-width: 8px;
+}
+#mobile-wasd-grid :nth-child(6) {
+    border-right-width: 8px;
+}
+#mobile-wasd-grid :nth-child(7) {
+    border-radius: 0px 0px 0px 8px;
+    border-width: 4px 4px 8px 8px;
+}
+#mobile-wasd-grid :nth-child(8) {
+    border-bottom-width: 8px;
+}
+#mobile-wasd-grid :nth-child(9) {
+    border-radius: 0px 0px 8px 0px;
+    border-width: 4px 8px 8px 4px;
+}
+
+#mobile-wasd-grid > button {
+    height: var(--wasd-grid-size);
+    width: var(--wasd-grid-size);
+}
+
+#mobile-button-shoot {
+    position: absolute;
+    bottom: var(--wasd-grid-size);
+    right: var(--wasd-grid-size);
+    height: var(--wasd-grid-size);
+    width: var(--wasd-grid-size)
+}
+
+#enable-mobile-button {
+    position: absolute;
+    bottom: 8px;
+    right: 68px;
+    border-radius: 10px;
+    padding: 8px;
+    z-index: 30;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#tank-class-container {
+    margin-bottom: 8px;
+}
+
+#tank-class-container > button {
+    width: 40px;
+    height: 40px;
+}
+
+#tank-class {
+    display: inline-block;
+    font-size: 1.2em;
+    text-align: center;
+    width: calc(100% - 80px);
+}
+
+#ping-container {
+    position: absolute;
+    bottom: 8px;
+    right: 68px;
+    background-color: var(--theme-dark);
+    color: white;
+    padding: 8px;
+    z-index: 500;
+    border-radius: 10px;
+    display: none;
+}
+
+#help-button {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 52px;
+    height: 52px;
+    z-index: 500;
+    font-size: 1.6em;
+}
+
+#create-dialog, #join-dialog, #help-dialog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#help-dialog {
+    top: -100%;
+    bottom: 100%;
+    transition: top 0.5s, bottom 0.5s;
+    overflow: hidden;
+    border: 4px solid var(--theme-dark);
+    background-color: var(--theme-normal);
+}
+
+button {
+    padding: 8px;
+    height: 40px;
+    border-radius: 10px;
+    border-width: 0;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--theme-dark);
+    color: #fff;
+}
+
+.button-wide {
+    padding: 8px 32px;
+}
+
+.text-input {
+    border-radius: 10px;
+    border-width: 0;
+    font-size: 1.2em;
+    padding: 0 8px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000a;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+#loading > img {
+    image-rendering: pixelated;
+    height: 30vmin;
+    width: 30vmin;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#tank-name {
+    width: 70%;
+    border-radius: 10px 0 0 10px;
+}
+
+#tank-color-button {
+    width: 30%;
+    border-width: 0;
+    border-radius: 0 10px 10px 0;
+}
+
+::placeholder {
+   text-align: center; 
+}
+
+#join-game-frfr {
+    width: 100%;
+    height: 40px;
+}
+
+.row {
+    width: 100%;
+}
+
+#toast-container {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 9999;
+}
+
+#toast-container > div {
+    background-color: #000a;
+    color: white;
+    border-radius: 9999px;
+    margin-bottom: 0;
+    font-size: 0em;
+    padding: 0px 8px;
+    transition: opacity 1s, padding 0.3s, margin-bottom 0.3s, font-size 0.3s;
+    text-overflow: clip;
+}
+
+#toast-container > div.active {
+    padding: 8px 32px;
+    margin-bottom: 8px;
+    font-size: 1em;
+}
