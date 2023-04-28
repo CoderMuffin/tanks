@@ -127,11 +127,11 @@ class GameServer {
             lastShot: Date.now(),
             lastHitBy: null,
             score: 0,
+            color: color,
+            type: type,
+            name: name,
             sync: {
                 wasd: { x: 0, y: 0 },
-                color: color,
-                type: type,
-                name: name,
                 hp: 5,
                 connected: true //marker for disconnects on clients
             },
@@ -143,7 +143,24 @@ class GameServer {
         if (this.callbacks.hardSync) {
             this.callbacks.hardSync(player, {
                 cubes: this.cubes,
-                id: player.id
+                id: player.id,
+                players: Object.values(this.players).map(function(player) {
+                    return {
+                        id: player.id,
+                        color: player.color,
+                        type: player.type,
+                        name: player.name
+                    };
+                })
+            });
+        }
+
+        if (this.callbacks.addPlayer) {
+            this.callbacks.addPlayer({
+                id: player.id,
+                color: player.color,
+                type: player.type,
+                name: player.name
             });
         }
 
@@ -176,15 +193,15 @@ class GameServer {
         this.physics.step(deltaTime);
         for (var key in this.players) {
             let player = this.players[key];
-            if (/* !player.ammoCooldown && */ player.shooting && now - player.lastShot > Util.tankData[player.sync.type].cooldown) {
+            if (/* !player.ammoCooldown && */ player.shooting && now - player.lastShot > Util.tankData[player.type].cooldown) {
                 player.lastShot = now;
                 // player.ammo--;
                 // if (player.ammo <= 0) {
                 //     player.ammoCooldown = true;
-                //     player.ammo = Util.tankData[player.sync.type].ammo;
+                //     player.ammo = Util.tankData[player.type].ammo;
                 //     setTimeout(function() {
                 //         player.ammoCooldown = false;
-                //     }, Util.tankData[player.sync.type].ammoCooldown);
+                //     }, Util.tankData[player.type].ammoCooldown);
                 // }
                 this.spawnBullet(player);
             }
@@ -240,7 +257,7 @@ class GameServer {
 
         ms.getWorldTransform(this.tmpTrans);
 
-        let speed = Util.tankData[player.sync.type].bulletSpeed;
+        let speed = Util.tankData[player.type].bulletSpeed;
         let p = this.tmpTrans.getOrigin();
         let from = { x: p.x(), y: p.y(), z: p.z() };
 
@@ -257,12 +274,12 @@ class GameServer {
         vel.y *= speed;
         vel.z *= speed;
 
-        let mass = Util.tankData[player.sync.type].bulletMass;
+        let mass = Util.tankData[player.type].bulletMass;
 
         if (this.callbacks.spawnBullet) {
             this.callbacks.spawnBullet({
                 id: bulletID,
-                color: player.sync.color,
+                color: player.color,
                 mass: mass,
                 from: from,
                 vel: vel
