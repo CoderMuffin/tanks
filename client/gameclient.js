@@ -161,17 +161,7 @@ class GameClient {
         cube.castShadow = true;
         meshGroup.add(cube);
         
-        let fontGeometry = new THREE.TextGeometry(name, {
-            font: this.threeFont,
-            size: 1,
-            height: 0.5,
-            curveSegments: 4,
-            bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.05,
-            bevelSegments: 3
-        });
-        fontGeometry.center();
+        let fontGeometry = this.tankText(name + ": 0");
         let text = new THREE.Mesh(fontGeometry, material);
         text.position.set(0, 0.5, 0);
         text.scale.set(0.2, 0.2, 0.2);
@@ -185,6 +175,21 @@ class GameClient {
             body: Util.newPlayerBody(this.physics, type),
             sync: null
         }
+    }
+
+    tankText(name) {
+        let geometry = new THREE.TextGeometry(name, {
+            font: this.threeFont,
+            size: 1,
+            height: 0.5,
+            curveSegments: 4,
+            bevelEnabled: true,
+            bevelThickness: 0.02,
+            bevelSize: 0.05,
+            bevelSegments: 3
+        });
+        geometry.center();
+        return geometry;
     }
 
     sync(syncData) {
@@ -213,6 +218,22 @@ class GameClient {
                 console.warn(`No such cube for id "${remoteMoveableCube.id}"`)
             }
         }
+        for (var scoreData of syncData.scoreData) {
+            console.log(scoreData);
+            this.updateScore(scoreData[0], scoreData[1]);
+            if (this.players[scoreData[2]]) {
+                this.updateScore(scoreData[2], scoreData[3]);
+            }
+        }
+    }
+
+    updateScore(playerID, score) {
+        let player = this.players[playerID];
+        player.score = score;
+        //1 is text, 0 is model
+        let text = player.model.children[1];
+        text.geometry.dispose();
+        text.geometry = this.tankText(player.sync.name + ": " + score);
     }
 
     hardSync(syncData) {

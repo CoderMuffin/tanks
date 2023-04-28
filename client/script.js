@@ -30,6 +30,18 @@ var tankClassNames = [
     "Heavy"
 ];
 
+function changeTankClass(change) {
+    tankClass += change;
+    while (tankClass >= tankClassNames.length) {
+        tankClass -= tankClassNames.length;
+    }
+    while (tankClass < 0) {
+        tankClass += tankClassNames.length;
+    }
+    elTankClass.innerText = tankClassNames[tankClass];
+}
+
+
 function registerMobileButtons() {
     let grid = document.getElementById("mobile-wasd-grid");
     let onmove = function(e) {
@@ -64,17 +76,6 @@ registerMobileButtons();
 
 function toggleMobileControls() {
     elMobileControls.style.display = elMobileControls.style.display == "none" ? "block" : "none";
-}
-
-function changeTankClass(change) {
-    tankClass += change;
-    while (tankClass >= tankClassNames.length) {
-        tankClass -= tankClassNames.length;
-    }
-    while (tankClass < 0) {
-        tankClass += tankClassNames.length;
-    }
-    elTankClass.innerText = tankClassNames[tankClass];
 }
 
 function loadResources() {
@@ -126,6 +127,23 @@ socket.on("verify-game-result", function(exists) {
     } else {
         prepareJoin();
     }
+});
+
+socket.on("disconnect", function() {
+    showToast("Disconnected from server");
+});
+
+socket.on("reconnect", function() {
+    //showToast("Reconnected to server");
+    //game.reconnect();
+});
+
+socket.on("failure", function(message) {
+    showToast("Error: " + message);
+});
+
+socket.on("hit", function(data) {
+    game.hit(data);
 });
 
 socket.on("connect", function() {
@@ -210,23 +228,6 @@ function joinGame() {
     game.removeDemoTank();
     socket.emit("join-game", joinData);
 }
-
-socket.on("disconnect", function() {
-    showToast("Disconnected from server");
-});
-
-socket.on("reconnect", function() {
-    //showToast("Reconnected to server");
-    //game.reconnect();
-});
-
-socket.on("failure", function(message) {
-    showToast("Error: " + message);
-});
-
-socket.on("hit", function(data) {
-    game.hit(data);
-});
 
 function updateWasd(wasd) {
     if ((!game) || (!socket)) return;

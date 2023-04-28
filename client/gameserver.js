@@ -106,6 +106,7 @@ class GameServer {
                     if (this.callbacks.hit) {
                         this.callbacks.hit({ who: player.id, by: bullet.firer });
                     }
+                    player.lastHitBy = bullet.firer;
                     player.sync.hp -= 1;
                 }
             }
@@ -124,6 +125,8 @@ class GameServer {
             ammoCooldown: false,
             ammo: Util.tankData[type].ammo,
             lastShot: Date.now(),
+            lastHitBy: null,
+            score: 0,
             sync: {
                 wasd: { x: 0, y: 0 },
                 color: color,
@@ -191,30 +194,43 @@ class GameServer {
     }
     sync() {
         let self = this;
-        if (this.callbacks.sync) {
-            this.callbacks.sync({
-                players: Object.values(this.players).map(function(player) {
-                    let physicsSync = self.physics.getSync(player.body);
-                    if (physicsSync && physicsSync.position.y <= -10) {
-                        physicsSync.position = { x: 0, y: 0, z: 0 };
-                        physicsSync.rotation = { x: 0, y: 0, z: 0, w: 1 };
-                        self.physics.setSync(player.body, physicsSync);
+        let scoreData = [];
+        let syncData = {
+            players: Object.values(this.players).map(function(player) {
+                let physicsSync = self.physics.getSync(player.body);
+                if (physicsSync && physicsSync.position.y <= -10) {
+                    physicsSync.position = { x: 0, y: 0, z: 0 };
+                    physicsSync.rotation = { x: 0, y: 0, z: 0, w: 1 };
+                    self.physics.setSync(player.body, physicsSync);
+                    
+                    player.score = Math.max(0, player.score - 1);
+                    let firer = self.players[player.lastHitBy];
+                    if (firer) {
+                        firer.score++;
                     }
-                    return {
-                        id: player.id,
-                        sync: player.sync,
-                        physicsSync: physicsSync
-                    };
-                }),
-                bullets: this.bullets.map(bullet => ({
-                    id: bullet.id,
-                    sync: this.physics.getSync(bullet.body)
-                })),
-                moveableCubes: this.moveableCubes.map(cube => ({
-                    id: cube.id,
-                    sync: this.physics.getSync(cube.body)
-                }))
-            });
+                    
+                    scoreData.push([player.id, player.score, player.lastHitBy, firer ? firer.score : 0]);
+                    player.lastHitBy = null;
+                }
+                return {
+                    id: player.id,
+                    sync: player.sync,
+                    physicsSync: physicsSync
+                };
+            }),
+            bullets: this.bullets.map(bullet => ({
+                id: bullet.id,
+                sync: this.physics.getSync(bullet.body)
+            })),
+            moveableCubes: this.moveableCubes.map(cube => ({
+                id: cube.id,
+                sync: this.physics.getSync(cube.body)
+            }))
+        }
+
+        syncData.scoreData = scoreData;
+        if (this.callbacks.sync) {
+            this.callbacks.sync(syncData);
         }
     }
     spawnBullet(player) {
