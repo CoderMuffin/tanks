@@ -2,11 +2,11 @@ class GameClient {
     constructor(resources, ammo, mode = "online") {
         this.threeFont = resources.threeFont;
         this.tankGeometry = resources.tankGeometry;
+        this.mode = mode;
         
         this.cubes = {};
         this.bullets = {};
         this.players = {};
-        this.localID = null;
 
         this.physics = new Physics(ammo);
         this.initTHREE();
@@ -27,31 +27,39 @@ class GameClient {
             }, 3000);
         }
 
-        this.mode = mode;
         this.lastTime = Date.now();
         this.animate();
     }
     initTHREE(multiplayer) {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x00c8ff);
-
-        let renderer = new THREE.WebGLRenderer();
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.domElement.id = "game-canvas";
-        document.body.appendChild(renderer.domElement);
+        this.threeTmp = {
+            v: new THREE.Vector3(),
+            q: new THREE.Quaternion(),
+            o: new THREE.Object3D()
+        }
         
-        this.cameras = [
-            {
-                camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
+        this.cameras = [];
+
+        let cameraCount = this.mode == "2Poffline" ? 2 : 1;
+
+        for (var i = 0; i < cameraCount; i++) {
+            let renderer = new THREE.WebGLRenderer();
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setSize(window.innerWidth / cameraCount, window.innerHeight);
+            renderer.domElement.className = "game-canvas";
+            renderer.domElement.style.left = 100 / cameraCount * i;
+            renderer.domElement.style.right = 100 - 100 / cameraCount * (i + 1);
+            document.body.appendChild(renderer.domElement);
+            this.cameras.push({
+                camera: new THREE.PerspectiveCamera(75, window.innerWidth / cameraCount / window.innerHeight, 0.1, 1000),
                 target: null,
                 renderer: renderer
-            }
-        ];
-        
-        this.cameras[0].camera.position.set(3, 3, 3);
-        this.cameras[0].camera.lookAt(0, 0, 0);
+            });
+            this.cameras[i].camera.position.set(3, 3, 3);
+            this.cameras[i].camera.lookAt(0, 0, 0);
+        }
 
         let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight.position.set(-10, 10, 5);
@@ -71,9 +79,9 @@ class GameClient {
         let self = this;
         window.addEventListener("resize", function() {
             for (var camera of self.cameras) {
-                camera.camera.aspect = window.innerWidth / window.innerHeight;
+                camera.camera.aspect = window.innerWidth / cameraCount / window.innerHeight;
                 camera.camera.updateProjectionMatrix();
-                camera.renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.renderer.setSize(window.innerWidth / cameraCount, window.innerHeight);
             }
         });
     }
@@ -125,7 +133,7 @@ class GameClient {
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
             }
-            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, id == this.localID);
+            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
 
         for (var id in this.bullets) {
@@ -138,12 +146,16 @@ class GameClient {
 
         for (var camera of this.cameras) {
             if (camera.target) {
-                let offset = new THREE.Vector3();
-                camera.target.getWorldDirection(offset);
-                offset.setY(0).normalize().negate().multiplyScalar(2).setY(1);
-                camera.camera.position.copy(camera.target.position);
-                camera.camera.position.add(offset);
-                camera.camera.lookAt(camera.target.position);
+                camera.target.getWorldDirection(this.threeTmp.v);
+                this.threeTmp.v.setY(0).normalize().negate().multiplyScalar(2).setY(1).add(camera.target.position);
+                //threejs is stupid here
+                //i never thought id see the day
+                //doesnt matter though because 30mins of work is now worth nothing :DDDDD
+                // this.threeTmp.o.position.copy(camera.target.position);
+                // this.threeTmp.o.lookAt(this.threeTmp.v);
+                camera.camera.position.copy(this.threeTmp.v);
+                camera.camera.lookAt(camera.target.position)
+                //camera.camera.quaternion.slerp(this.threeTmp.o.quaternion, 0.2);
             }
             camera.renderer.render(this.scene, camera.camera);
         }
@@ -153,15 +165,17 @@ class GameClient {
         
     }
 
-    createPlayer(id, name, color, type) {
+    createPlayer(data) {
+        if (this.players[data.id]) return;
+        
         let meshGroup = new THREE.Group();
         
-        let material = new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide });
+        let material = new THREE.MeshPhongMaterial({ color: data.color, side: THREE.DoubleSide });
         let cube = new THREE.Mesh(this.tankGeometry, material);
         cube.castShadow = true;
         meshGroup.add(cube);
         
-        let fontGeometry = this.tankText(name + ": 0");
+        let fontGeometry = this.tankText(data.name + ": 0");
         let text = new THREE.Mesh(fontGeometry, material);
         text.position.set(0, 0.5, 0);
         text.scale.set(0.2, 0.2, 0.2);
@@ -169,11 +183,18 @@ class GameClient {
         
         this.scene.add(meshGroup);
 
-        this.players[id] = {
+        this.players[data.id] = {
             model: meshGroup,
             text: text,
-            body: Util.newPlayerBody(this.physics, type),
-            sync: null
+            name: data.name,
+            color: data.color,
+            type: data.type,
+            body: Util.newPlayerBody(this.physics, data.type),
+            sync: {
+                wasd: { x: 0, y: 0 },
+                hp: 5,
+                connected: false
+            }
         }
     }
 
@@ -195,11 +216,8 @@ class GameClient {
     sync(syncData) {
         for (var remotePlayer of syncData.players) {
             if (this.players[remotePlayer.id] == null) {
-                this.createPlayer(remotePlayer.id, remotePlayer.sync.name, remotePlayer.sync.color, remotePlayer.sync.type);
-
-                if (remotePlayer.id == this.localID) {
-                    this.cameras[0].target = this.players[remotePlayer.id].model;
-                }
+                console.warn(`No such player for id "${remotePlayer.id}"`);
+                continue;
             }
             this.players[remotePlayer.id].sync = remotePlayer.sync;
             this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
@@ -233,13 +251,15 @@ class GameClient {
         //1 is text, 0 is model
         let text = player.model.children[1];
         text.geometry.dispose();
-        text.geometry = this.tankText(player.sync.name + ": " + score);
+        text.geometry = this.tankText(player.data.name + ": " + score);
     }
 
     hardSync(syncData) {
-        this.localID = syncData.id;
         for (var cube of syncData.cubes) {
             this.cubes[cube.id] = cube;
+        }
+        for (var player of syncData.players) {
+            this.createPlayer(player);
         }
         Util.addCubeBodies(this.physics, Object.values(this.cubes), this.scene);
     }

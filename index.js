@@ -79,6 +79,9 @@ io.on('connection', (socket) => {
             spawnBullet: function(data) {
                 emit(game, "spawn-bullet", data);
             },
+            addPlayer: function(data) {
+                emit(game, "add-player", data);
+            },
             hit: function(data) {}
         });
         games.set(id, game);

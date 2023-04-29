@@ -17,9 +17,11 @@ var elMobileControls = document.getElementById("mobile-controls");
 var demoTank = null;
 var socket = io();
 var gameID = null;
-var game;
+var game = null;
 
-var localServer;
+var localID = null;
+
+var localServer = null;
 
 var gameResources = {};
 
@@ -114,11 +116,17 @@ socket.on("ping", function(data) {
 socket.on("spawn-bullet", function(data) {
     game.spawnBullet(data);
 });
+socket.on("add-player", function(data) {
+    console.log(data);
+    game.createPlayer(data);
+});
 socket.on("hard-sync", function(data) {
     showToast("Joined game");
     elCreateDialog.style.display = "none";
     elJoinDialog.style.display = "none";
     game.hardSync(data);
+    localID = data.id;
+    game.cameras[0].target = game.players[data.id].model;
 });
 socket.on("verify-game-result", function(exists) {
     if (!exists) {
@@ -128,24 +136,19 @@ socket.on("verify-game-result", function(exists) {
         prepareJoin();
     }
 });
-
 socket.on("disconnect", function() {
     showToast("Disconnected from server");
 });
-
 socket.on("reconnect", function() {
     //showToast("Reconnected to server");
     //game.reconnect();
 });
-
 socket.on("failure", function(message) {
     showToast("Error: " + message);
 });
-
 socket.on("hit", function(data) {
     game.hit(data);
 });
-
 socket.on("connect", function() {
     showToast("Connected to server");
     let gameIDurl = params.get("game");
@@ -159,6 +162,25 @@ socket.on("connect", function() {
 function createGameLocal() {
     let mode = "2Poffline";
     prepareJoin(mode);
+    game.removeDemoTank();
+    elJoinDialog.style.display = "none";
+    let hardSynced = false;
+    localServer = new GameServer(ammo, {
+        hardSync: function(player, data) {
+            if (hardSynced) return;
+            hardSynced = true;
+            game.hardSync(data);
+        },
+        sync: function(data) {
+            game.sync(data);
+        },
+        spawnBullet: function(data) {
+            game.spawnBullet(data);
+        },
+        hit: function(data) {}
+    });
+    localServer.addPlayer(null, "Player 1", "#0000ff", 1);
+    localServer.addPlayer(null, "Player 2", "#ff0000", 1);
 }
 
 function updateColors() {

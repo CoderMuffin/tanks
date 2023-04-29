@@ -91,7 +91,7 @@ html, body {
     z-index: 30;
 }
 
-#game-canvas {
+.game-canvas {
     position: absolute;
     top: 0;
     left: 0;

@@ -94,16 +94,16 @@ const Util = {
             Util.getFacingFromQuaternion(q, Util.tmpVec);
             if (player.sync.wasd.y == 1) {
                 //player.body.activate(true);
-                player.body.applyCentralForce(Util.tmpVec.op_mul(deltaTime / 2 * Util.tankData[player.sync.type].speed));
+                player.body.applyCentralForce(Util.tmpVec.op_mul(deltaTime / 2 * Util.tankData[player.type].speed));
             } else if (player.sync.wasd.y == -1) {
                 //player.body.activate(true);
-                player.body.applyCentralForce(Util.tmpVec.op_mul(-deltaTime / 2 * Util.tankData[player.sync.type].speed));
+                player.body.applyCentralForce(Util.tmpVec.op_mul(-deltaTime / 2 * Util.tankData[player.type].speed));
             } 
             
             if (player.sync.wasd.x != 0) {
                 //player.body.activate(true);
                 let turnSpeedScale = 1 - Math.abs(player.sync.wasd.y) * 0.3;
-                Util.tmpVec.setValue(0, -(player.sync.wasd.x * turnSpeedScale) * deltaTime / 5 * Util.tankData[player.sync.type].turnSpeed, 0);
+                Util.tmpVec.setValue(0, -(player.sync.wasd.x * turnSpeedScale) * deltaTime / 5 * Util.tankData[player.type].turnSpeed, 0);
                 player.body.applyTorque(Util.tmpVec);
             }
         }
@@ -162,8 +162,8 @@ const Util = {
             if (lerp) {
                 Util.tmpThreeVec.set(p.x(), p.y(), p.z());
                 Util.tmpThreeQuat.set(q.x(), q.y(), q.z(), q.w());
-                model.position.lerp(Util.tmpThreeVec, 0.2);
-                model.quaternion.slerp(Util.tmpThreeQuat, 0.1);
+                model.position.lerp(Util.tmpThreeVec, 0.3);
+                model.quaternion.slerp(Util.tmpThreeQuat, 0.3);
             } else {
                 model.position.set(p.x(), p.y(), p.z());
                 model.quaternion.set(q.x(), q.y(), q.z(), q.w());
