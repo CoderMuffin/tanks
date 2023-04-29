@@ -10,7 +10,7 @@ class GameServer {
                 position: { x: x, y: size / 2 - 0.5, z: z },
                 rotation: { x: 0, y: 0, z: 0 },
                 size: { x: size, y: size, z: size },
-                friction: 0.5,
+                friction: 0.8,
                 mass: mass,
                 texture: mass == 0 ? 0 : 1
             }

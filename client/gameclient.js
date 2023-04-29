@@ -33,6 +33,11 @@ class GameClient {
     initTHREE(multiplayer) {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x00c8ff);
+        this.threeTmp = {
+            v: new THREE.Vector3(),
+            q: new THREE.Quaternion(),
+            o: new THREE.Object3D()
+        }
         
         this.cameras = [];
 
@@ -128,7 +133,7 @@ class GameClient {
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
             }
-            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model);
+            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
 
         for (var id in this.bullets) {
@@ -141,12 +146,16 @@ class GameClient {
 
         for (var camera of this.cameras) {
             if (camera.target) {
-                let offset = new THREE.Vector3();
-                camera.target.getWorldDirection(offset);
-                offset.setY(0).normalize().negate().multiplyScalar(2).setY(1);
-                camera.camera.position.copy(camera.target.position);
-                camera.camera.position.add(offset);
-                camera.camera.lookAt(camera.target.position);
+                camera.target.getWorldDirection(this.threeTmp.v);
+                this.threeTmp.v.setY(0).normalize().negate().multiplyScalar(2).setY(1).add(camera.target.position);
+                //threejs is stupid here
+                //i never thought id see the day
+                //doesnt matter though because 30mins of work is now worth nothing :DDDDD
+                // this.threeTmp.o.position.copy(camera.target.position);
+                // this.threeTmp.o.lookAt(this.threeTmp.v);
+                camera.camera.position.copy(this.threeTmp.v);
+                camera.camera.lookAt(camera.target.position)
+                //camera.camera.quaternion.slerp(this.threeTmp.o.quaternion, 0.2);
             }
             camera.renderer.render(this.scene, camera.camera);
         }
@@ -157,6 +166,8 @@ class GameClient {
     }
 
     createPlayer(data) {
+        if (this.players[data.id]) return;
+        
         let meshGroup = new THREE.Group();
         
         let material = new THREE.MeshPhongMaterial({ color: data.color, side: THREE.DoubleSide });

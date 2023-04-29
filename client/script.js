@@ -117,6 +117,7 @@ socket.on("spawn-bullet", function(data) {
     game.spawnBullet(data);
 });
 socket.on("add-player", function(data) {
+    console.log(data);
     game.createPlayer(data);
 });
 socket.on("hard-sync", function(data) {

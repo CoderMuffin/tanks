@@ -162,8 +162,8 @@ const Util = {
             if (lerp) {
                 Util.tmpThreeVec.set(p.x(), p.y(), p.z());
                 Util.tmpThreeQuat.set(q.x(), q.y(), q.z(), q.w());
-                model.position.lerp(Util.tmpThreeVec, 0.2);
-                model.quaternion.slerp(Util.tmpThreeQuat, 0.1);
+                model.position.lerp(Util.tmpThreeVec, 0.3);
+                model.quaternion.slerp(Util.tmpThreeQuat, 0.3);
             } else {
                 model.position.set(p.x(), p.y(), p.z());
                 model.quaternion.set(q.x(), q.y(), q.z(), q.w());
