@@ -117,6 +117,13 @@ io.on('connection', (socket) => {
         game.players[playerID].sync.wasd = wasd;
     });
 
+    socket.on("emote", function(emote) {
+        let game = games.get(gameID);
+        if (game == null) return;
+        
+        emit(game, "emote", { id: playerID, emote: emote });
+    })
+
     socket.on("spawn-bullet", function() {
         let game = games.get(gameID);
         if (game == null) return;

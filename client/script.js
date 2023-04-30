@@ -86,6 +86,13 @@ function loadResources() {
 
     const fontLoader = new THREE.FontLoader();
     fontLoader.load("font/golos.json", font => gameResources.threeFont = font);
+
+    gameResources.emotes = [
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/codermuffin1024x1024.png'), transparent: true }),
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/laughing-emote-dank.png'), transparent: true }),
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up.png'), transparent: true }),
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoade-2r()).load('img/thumbs-up-2.png'), transparent: true })
+    ]
 }
 
 loadResources();
@@ -158,6 +165,9 @@ socket.on("connect", function() {
         socket.emit("verify-game", gameID);
     }
 });
+socket.on("emote", function(data) {
+    game.emote(data.id, data.emote);
+})
 
 function createGameLocal() {
     let mode = "2Poffline";
@@ -287,6 +297,20 @@ window.addEventListener("keydown", function(e) {
         updateWasd(wasd);
     }
 });
+window.addEventListener("keypress", function(e) {
+    if (e.code == "Digit1") {
+        socket.emit("emote", 0);
+    }
+    if (e.code == "Digit2") {
+        socket.emit("emote", 1);
+    }
+    if (e.code == "Digit3") {
+        socket.emit("emote", 2);
+    }
+    if (e.code == "Digit4") {
+        socket.emit("emote", 3);
+    }
+})
 window.addEventListener("keyup", function(e) {
     if (e.code == "KeyA" || e.code == "ArrowLeft") {
         wasd.x = 0;
