@@ -110,11 +110,15 @@ io.on('connection', (socket) => {
         joinGame(data);
     });
 
-    socket.on("update-wasd", function(wasd) {
+    socket.on("update-wasd", function(data) {
         let game = games.get(gameID);
         if (game == null) return;
 
-        game.players[playerID].sync.wasd = wasd;
+        let player = game.players[playerID];
+        if (!player) return;
+        player.sync.wasd = data.wasd;
+        let localSync = game.physics.getSync(player.body);
+        game.physics.setSync(player.body, data.sync);
     });
 
     socket.on("spawn-bullet", function() {

@@ -119,6 +119,7 @@ class GameServer {
         //this.emit("ping", Date.now());
     }
     addPlayer(socket, name, color, type) {
+        let localID = this.generateID();
         let player = {
             body: Util.newPlayerBody(this.physics, type),
             shooting: false,
@@ -135,7 +136,7 @@ class GameServer {
                 hp: 5,
                 connected: true //marker for disconnects on clients
             },
-            id: this.generateID()
+            id: localID
         };
         player.socket = socket;
         this.players[player.id] = player;
@@ -149,7 +150,8 @@ class GameServer {
                         id: player.id,
                         color: player.color,
                         type: player.type,
-                        name: player.name
+                        name: player.name,
+                        local: localID == player.id
                     };
                 })
             });

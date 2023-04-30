@@ -7,6 +7,7 @@ class GameClient {
         this.cubes = {};
         this.bullets = {};
         this.players = {};
+        this.localIDs = [];
 
         this.physics = new Physics(ammo);
         this.initTHREE();
@@ -16,7 +17,7 @@ class GameClient {
             setInterval(function() {
                 for (var id in self.players) {
                     let player = self.players[id];
-                    if (!player.sync.connected) { //set by server
+                    if (!self.localIDs.includes(id) && !player.sync.connected) { //set by server
                         self.physics.remove(player.body);
                         self.scene.remove(player.model);
                         delete self.players[id];
@@ -167,6 +168,10 @@ class GameClient {
 
     createPlayer(data) {
         if (this.players[data.id]) return;
+
+        if (data.local) {
+            this.localIDs.push(data.id);
+        }
         
         let meshGroup = new THREE.Group();
         
@@ -219,6 +224,8 @@ class GameClient {
                 console.warn(`No such player for id "${remotePlayer.id}"`);
                 continue;
             }
+            if (this.localIDs.includes(remotePlayer.id)) continue;
+            
             this.players[remotePlayer.id].sync = remotePlayer.sync;
             this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
         }
