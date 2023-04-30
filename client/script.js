@@ -250,11 +250,15 @@ window.addEventListener("keydown", function(e) {
         newWasd.y = 1;
     } else if (e.code == "KeyS" || e.code == "ArrowDown") {
         newWasd.y = -1;
-    } else if (e.code == "Space") {
+    } else if (e.code == "Space" && !e.repeat) {
         socket.emit("spawn-bullet-start");
         return; //prevent WASD update
     } else if (e.code == "BrowserForward") {
         createGameLocal();
+    } else if (e.code == "Slash") {
+        if (game) {
+            
+        }
     }
     if (newWasd.x != wasd.x || newWasd.y != wasd.y) {
         wasd = newWasd;
