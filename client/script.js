@@ -91,7 +91,7 @@ function loadResources() {
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/codermuffin1024x1024.png'), transparent: true }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/laughing-emote-dank.png'), transparent: true }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up.png'), transparent: true }),
-        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoade-2r()).load('img/thumbs-up-2.png'), transparent: true })
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up-2.png'), transparent: true })
     ]
 }
 
