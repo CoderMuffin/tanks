@@ -2,6 +2,10 @@ class GameClient {
     constructor(resources, ammo, mode = "online") {
         this.threeFont = resources.threeFont;
         this.tankGeometry = resources.tankGeometry;
+        this.elDebug = document.getElementById("debug");
+        this.debug = {
+            cubes: 0,
+        };
         this.mode = mode;
         
         this.cubes = {};
@@ -121,6 +125,7 @@ class GameClient {
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
+        this.elDebug.innerText = `fps ${Math.round(1/deltaTime*1000)} cubes ${this.debug.cubes}`;
         this.physics.step(deltaTime);
         requestAnimationFrame(() => this.animate());
 
@@ -236,6 +241,7 @@ class GameClient {
                 console.warn(`No such cube for id "${remoteMoveableCube.id}"`)
             }
         }
+        this.debug.cubes = syncData.moveableCubes.length;
         for (var scoreData of syncData.scoreData) {
             console.log(scoreData);
             this.updateScore(scoreData[0], scoreData[1]);
