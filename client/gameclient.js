@@ -2,6 +2,11 @@ class GameClient {
     constructor(resources, ammo, mode = "online") {
         this.threeFont = resources.threeFont;
         this.tankGeometry = resources.tankGeometry;
+        this.elDebug = document.getElementById("debug");
+        this.debug = {
+            cubes: 0,
+        };
+        this.emotes = resources.emotes;
         this.mode = mode;
         
         this.cubes = {};
@@ -122,6 +127,7 @@ class GameClient {
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
+        this.elDebug.innerText = `fps ${Math.round(1/deltaTime*1000)} cubes ${this.debug.cubes}`;
         this.physics.step(deltaTime);
         requestAnimationFrame(() => this.animate());
 
@@ -133,6 +139,7 @@ class GameClient {
             this.players[id] = Util.stepPlayer(this.physics.ammo, this.players[id], deltaTime);
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
+                this.players[id].emote.lookAt(this.cameras[0].camera.position);
             }
             Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
@@ -186,11 +193,18 @@ class GameClient {
         text.scale.set(0.2, 0.2, 0.2);
         meshGroup.add(text);
         
+        let planeGeometry = new THREE.PlaneGeometry(0.4, 0.4);
+        let emote = new THREE.Mesh(planeGeometry, material);
+        emote.position.set(0.3, 0.2, 0.5);
+        emote.scale.set(0, 0, 0);
+        meshGroup.add(emote);
+        
         this.scene.add(meshGroup);
 
         this.players[data.id] = {
             model: meshGroup,
             text: text,
+            emote: emote,
             name: data.name,
             color: data.color,
             type: data.type,
@@ -243,6 +257,7 @@ class GameClient {
                 console.warn(`No such cube for id "${remoteMoveableCube.id}"`)
             }
         }
+        this.debug.cubes = syncData.moveableCubes.length;
         for (var scoreData of syncData.scoreData) {
             console.log(scoreData);
             this.updateScore(scoreData[0], scoreData[1]);
@@ -252,11 +267,22 @@ class GameClient {
         }
     }
 
+    emote(id, emote) {
+        let player = this.players[id];
+        if (!player) return;
+        clearInterval(player.emoteTimeout);
+        player.emote.material = this.emotes[emote];
+        player.emote.scale.set(1, 1, 1);
+        player.emoteTimeout = setTimeout(function() {
+            player.emote.scale.set(0, 0, 0);
+        }, 3000);
+    }
+
     updateScore(playerID, score) {
         let player = this.players[playerID];
         player.score = score;
         //1 is text, 0 is model
-        let text = player.model.children[1];
+        let text = player.text;
         text.geometry.dispose();
         text.geometry = this.tankText(player.data.name + ": " + score);
     }
