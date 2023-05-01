@@ -277,7 +277,7 @@ class GameClient {
         //1 is text, 0 is model
         let text = player.text;
         text.geometry.dispose();
-        text.geometry = this.tankText(player.data.name + ": " + score);
+        text.geometry = this.tankText(player.name + ": " + score);
     }
 
     hardSync(syncData) {
