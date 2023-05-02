@@ -241,7 +241,7 @@ class GameServer {
                 id: bullet.id,
                 sync: this.physics.getSync(bullet.body)
             })),
-            moveableCubes: this.moveableCubes.filter(cube => cube.body.isActive()).map(cube => ({
+            moveableCubes: this.moveableCubes.filter(cube => cube.body.isActive() && cube.position.y >= -10).map(cube => ({
                 id: cube.id,
                 sync: this.physics.getSync(cube.body)
             }))

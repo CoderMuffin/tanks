@@ -22,7 +22,8 @@ class GameClient {
             setInterval(function() {
                 for (var id in self.players) {
                     let player = self.players[id];
-                    if (!self.localIDs.includes(id) && !player.sync.connected) { //set by server
+                    if (!self.localIDs.includes(id) && !player.sync.connected) {
+                        console.log("dc'd "+id);
                         self.physics.remove(player.body);
                         self.scene.remove(player.model);
                         delete self.players[id];
@@ -209,10 +210,11 @@ class GameClient {
             color: data.color,
             type: data.type,
             body: Util.newPlayerBody(this.physics, data.type),
+            lastFetched: Date.now(),
             sync: {
                 wasd: { x: 0, y: 0 },
                 hp: 5,
-                connected: false
+                connected: true //assume connected until we reset otherwise weird stuff happens
             }
         }
     }

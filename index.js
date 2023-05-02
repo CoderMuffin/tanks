@@ -30,6 +30,7 @@ io.on('connection', (socket) => {
         }
         try {
             clearInterval(game.dcTimeout);
+            console.log(`[${new Date()}] Cancelled closure of game "${gameID}"`);
         } catch { };
         playerID = game.addPlayer(socket, data.name.toString(), parseInt(data.color.replace("#", ""), 16), data.type);
         gameID = data.id;
