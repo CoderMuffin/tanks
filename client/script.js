@@ -92,7 +92,8 @@ function loadResources() {
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/laughing-emote-dank.png'), transparent: true }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up.png'), transparent: true }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up-2.png'), transparent: true }),
-        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/nerd-emote.jpg') })
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/nerd-emote.jpg') }),
+        new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/moai.png'), transparent: true })
     ]
 }
 
@@ -299,6 +300,8 @@ window.addEventListener("keydown", function(e) {
     }
 });
 window.addEventListener("keypress", function(e) {
+    //i know this can be optimised
+    //i dont wanna hear it :D
     if (e.code == "Digit1") {
         socket.emit("emote", 0);
     }
@@ -313,6 +316,9 @@ window.addEventListener("keypress", function(e) {
     }
     if (e.code == "Digit5") {
         socket.emit("emote", 4);
+    }
+    if (e.code == "Digit6") {
+        socket.emit("emote", 5);
     }
 })
 window.addEventListener("keyup", function(e) {
