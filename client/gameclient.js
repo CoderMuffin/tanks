@@ -37,6 +37,7 @@ class GameClient {
         this.lastTime = Date.now();
         this.animate();
     }
+    
     initTHREE(multiplayer) {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x00c8ff);

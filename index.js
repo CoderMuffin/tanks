@@ -118,8 +118,8 @@ io.on('connection', (socket) => {
         let player = game.players[playerID];
         if (!player) return;
         player.sync.wasd = data.wasd;
-        let localSync = game.physics.getSync(player.body);
-        game.physics.setSync(player.body, data.sync);
+        // let localSync = game.physics.getSync(player.body);
+        // game.physics.setSync(player.body, data.sync);
     });
 
     socket.on("emote", function(emote) {
