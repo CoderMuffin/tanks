@@ -67,7 +67,7 @@ class Physics {
         return body;
     }
     step(deltaTime) {
-        const fixedDeltaTime = 20; //20ms
+        const fixedDeltaTime = 15; //20ms
 
         this.timeAcc += deltaTime;
         while (this.timeAcc >= fixedDeltaTime) {
@@ -96,6 +96,7 @@ class Physics {
             console.warn("Skipped null syncData");
             return;
         }
+        
         this.tmpVec.setValue(syncData.position.x, syncData.position.y, syncData.position.z);
         this.tmpTrans.setOrigin(this.tmpVec);
         this.tmpQuat.setValue(syncData.rotation.x, syncData.rotation.y, syncData.rotation.z, syncData.rotation.w);
@@ -123,6 +124,26 @@ class Physics {
             };
         }
         return null;
+    }
+    lerpSync(body, syncData, by) {
+        let ms = body.getMotionState();
+        if (ms) {
+            ms.getWorldTransform(this.tmpTrans);
+            
+            let p = this.tmpTrans.getOrigin();
+            let old = { x: p.x(), y: p.y(), z: p.z() };
+            Util.lerpSyncVec(old, syncData.position, by);
+            this.tmpVec.setValue(old.x, old.y, old.z);
+            this.tmpTrans.setOrigin(this.tmpVec);
+
+            let q = this.tmpTrans.getRotation();
+            let oldRotation = { x: q.x(), y: q.y(), z: q.z(), w: q.w() };
+            Util.lerpSyncQuat(oldRotation, syncData.rotation, by);
+            this.tmpQuat.setValue(oldRotation.x, oldRotation.y, oldRotation.z, oldRotation.w);
+            this.tmpTrans.setRotation(this.tmpQuat);
+            
+            body.setWorldTransform(this.tmpTrans);
+        }
     }
 }
 

@@ -139,6 +139,82 @@ const Util = {
     bulletSize(mass) {
         return Math.min(0.3, Math.max(0.1, 0.04 * mass));
     },
+    lerpSyncVec(from, to, by) {
+        from.x += (to.x - from.x) * by;
+        from.y += (to.y - from.y) * by;
+        from.z += (to.z - from.z) * by;
+    },
+    lerpSyncQuatField(from, to, by, angle, denom) {
+        return (from*Math.sin((1-by)*angle) + to*Math.sin(by*angle))/denom;
+    },
+    //ty threejs
+    lerpSyncQuat(from, to, by) {
+		if ( by === 0 ) return from;
+		if ( by === 1 ) return to;
+
+        let w = from.w, x = from.x, z = from.z, y = from.y;
+		let cosHalfTheta = x * to.x + y * to.y + z * to.z + w * to.w;
+
+		if ( cosHalfTheta < 0 ) {
+			from.w = -to.w;
+			from.x = -to.x;
+			from.y = -to.y;
+			from.z = -to.z;
+            
+			cosHalfTheta = -cosHalfTheta;
+
+		} else {
+
+			from.w = to.w;
+            from.x = to.x;
+            from.y = to.y;
+            from.z = to.z;
+
+		}
+
+		if ( cosHalfTheta >= 1.0 ) {
+
+			from.w = w;
+			from.x = x;
+			from.y = y;
+			from.z = z;
+
+			return from;
+
+		}
+
+		const sqrSinHalfTheta = 1.0 - cosHalfTheta * cosHalfTheta;
+
+		if ( sqrSinHalfTheta <= Number.EPSILON ) {
+
+			const s = 1 - by;
+			from.w = s * w + by * from.w;
+			from.x = s * x + by * from.x;
+			from.y = s * y + by * from.y;
+			from.z = s * z + by * from.z;
+
+			let l = Math.sqrt(from.w*from.w + from.x*from.x + from.y*from.y + from.z*from.z);
+            from.w /= l;
+            from.x /= l;
+            from.y /= l;
+            from.z /= l;
+            
+			return from;
+
+		}
+
+		const sinHalfTheta = Math.sqrt( sqrSinHalfTheta );
+		const halfTheta = Math.atan2( sinHalfTheta, cosHalfTheta );
+		const ratioA = Math.sin( ( 1 - by ) * halfTheta ) / sinHalfTheta,
+			ratioB = Math.sin( by * halfTheta ) / sinHalfTheta;
+
+		from.w = ( w * ratioA + from.w * ratioB );
+		from.x = ( x * ratioA + from.x * ratioB );
+		from.y = ( y * ratioA + from.y * ratioB );
+		from.z = ( z * ratioA + from.z * ratioB );
+
+		return from;
+    },
     spawnBullet(physics, from, vel, mass) {
         Util.prepareTmps(physics.ammo);
         Util.tmpVec.setValue(from.x, from.y, from.z);

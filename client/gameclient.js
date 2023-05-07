@@ -117,6 +117,7 @@ class GameClient {
             model: mesh
         }
         let self = this;
+        // this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);
@@ -142,6 +143,9 @@ class GameClient {
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
                 this.players[id].emote.lookAt(this.cameras[0].camera.position);
+            }
+            if (this.players[id].physicsSyncAspiration) {
+                this.physics.lerpSync(this.players[id].body, this.players[id].physicsSyncAspiration, 0.01);
             }
             Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
@@ -241,10 +245,15 @@ class GameClient {
                 console.warn(`No such player for id "${remotePlayer.id}"`);
                 continue;
             }
-            if (this.localIDs.includes(remotePlayer.id)) continue;
             
-            this.players[remotePlayer.id].sync = remotePlayer.sync;
-            this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
+            let forceSync = !this.localIDs.includes(remotePlayer.id) || remotePlayer.authoritative;
+            
+            if (forceSync) {
+                this.players[remotePlayer.id].sync = remotePlayer.sync;
+                this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
+            } else {
+                //this.players[remotePlayer.id].physicsSyncAspiration = remotePlayer.physicsSync;
+            }
         }
         for (var remoteBullet of syncData.bullets) {
             if (this.bullets[remoteBullet.id]) {
