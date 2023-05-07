@@ -19,8 +19,6 @@ var socket = io();
 var gameID = null;
 var game = null;
 
-var localID = null;
-
 var localServer = null;
 
 var gameResources = {};
@@ -75,6 +73,10 @@ function registerMobileButtons() {
 }
 
 registerMobileButtons();
+
+setInterval(function() {
+    updateWasd(wasd);
+}, 100);
 
 function toggleMobileControls() {
     elMobileControls.style.display = elMobileControls.style.display == "none" ? "block" : "none";
@@ -134,8 +136,10 @@ socket.on("hard-sync", function(data) {
     elCreateDialog.style.display = "none";
     elJoinDialog.style.display = "none";
     game.hardSync(data);
-    localID = data.id;
-    game.cameras[0].target = game.players[data.id].model;
+    for (var i = 0; i < game.cameras.length; i++) {
+        console.log(game.cameras, game.localIDs, i);
+        game.cameras[i].target = game.players[game.localIDs[i]].model;
+    }
 });
 socket.on("verify-game-result", function(exists) {
     if (!exists) {
@@ -265,11 +269,14 @@ function joinGame() {
 
 function updateWasd(wasd) {
     if ((!game) || (!socket)) return;
-    let player = game.players[game.localID];
+    let player = game.players[game.localIDs[0]];
     if (player) {
         player.sync.wasd = wasd;
+        socket.emit("update-wasd", {
+            wasd: wasd,
+            sync: game.physics.getSync(player.body)
+        });
     }
-    socket.emit("update-wasd", wasd);
 }
 
 let shootCooldown = Date.now();

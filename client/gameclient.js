@@ -12,6 +12,7 @@ class GameClient {
         this.cubes = {};
         this.bullets = {};
         this.players = {};
+        this.localIDs = [];
 
         this.physics = new Physics(ammo);
         this.initTHREE();
@@ -21,7 +22,7 @@ class GameClient {
             setInterval(function() {
                 for (var id in self.players) {
                     let player = self.players[id];
-                    if (!player.sync.connected) { //set by server
+                    if (!self.localIDs.includes(id) && !player.sync.connected) {
                         console.log("dc'd "+id);
                         self.physics.remove(player.body);
                         self.scene.remove(player.model);
@@ -36,6 +37,7 @@ class GameClient {
         this.lastTime = Date.now();
         this.animate();
     }
+    
     initTHREE(multiplayer) {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x00c8ff);
@@ -115,6 +117,7 @@ class GameClient {
             model: mesh
         }
         let self = this;
+        // this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);
@@ -140,6 +143,9 @@ class GameClient {
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
                 this.players[id].emote.lookAt(this.cameras[0].camera.position);
+            }
+            if (this.players[id].physicsSyncAspiration) {
+                this.physics.lerpSync(this.players[id].body, this.players[id].physicsSyncAspiration, 0.01);
             }
             Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
@@ -175,6 +181,10 @@ class GameClient {
 
     createPlayer(data) {
         if (this.players[data.id]) return;
+
+        if (data.local) {
+            this.localIDs.push(data.id);
+        }
         
         let meshGroup = new THREE.Group();
         
@@ -235,8 +245,15 @@ class GameClient {
                 console.warn(`No such player for id "${remotePlayer.id}"`);
                 continue;
             }
-            this.players[remotePlayer.id].sync = remotePlayer.sync;
-            this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
+            
+            let forceSync = !this.localIDs.includes(remotePlayer.id) || remotePlayer.authoritative;
+            
+            if (forceSync) {
+                this.players[remotePlayer.id].sync = remotePlayer.sync;
+                this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
+            } else {
+                //this.players[remotePlayer.id].physicsSyncAspiration = remotePlayer.physicsSync;
+            }
         }
         for (var remoteBullet of syncData.bullets) {
             if (this.bullets[remoteBullet.id]) {

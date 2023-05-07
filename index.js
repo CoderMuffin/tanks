@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
         }
         try {
             clearInterval(game.dcTimeout);
-            console.log(`[${new Date()}] Cancelled closure of game "${gameID}"`);
+            console.log(`[${new Date()}] Cancelled closure of game "${data.id}"`);
         } catch { };
         playerID = game.addPlayer(socket, data.name.toString(), parseInt(data.color.replace("#", ""), 16), data.type);
         gameID = data.id;
@@ -111,11 +111,16 @@ io.on('connection', (socket) => {
         joinGame(data);
     });
 
-    socket.on("update-wasd", function(wasd) {
+    socket.on("update-wasd", function(data) {
         let game = games.get(gameID);
         if (game == null) return;
 
-        game.players[playerID].sync.wasd = wasd;
+        let player = game.players[playerID];
+        if (!player) return;
+        player.sync.wasd = data.wasd;
+        if (game.inControl(player)) {
+            game.physics.lerpSync(player.body, data.sync, 0.2);
+        }
     });
 
     socket.on("emote", function(emote) {

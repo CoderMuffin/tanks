@@ -86,7 +86,7 @@ class GameServer {
 
         this.intervals = [
             setInterval(() => this.ping(), 3000),
-            setInterval(() => this.sync(), 100),
+            setInterval(() => this.sync(), 400),
             setInterval(() => this.step(), 16)
         ];
 
@@ -107,6 +107,7 @@ class GameServer {
                         this.callbacks.hit({ who: player.id, by: bullet.firer });
                     }
                     player.lastHitBy = bullet.firer;
+                    player.lastControlLoss = Date.now();
                     player.sync.hp -= 1;
                 }
             }
@@ -119,13 +120,15 @@ class GameServer {
         //this.emit("ping", Date.now());
     }
     addPlayer(socket, name, color, type) {
+        let localID = this.generateID();
         let player = {
             body: Util.newPlayerBody(this.physics, type),
             shooting: false,
             ammoCooldown: false,
             ammo: Util.tankData[type].ammo,
-            lastShot: Date.now(),
+            lastControlLoss: 0,
             lastHitBy: null,
+            lastShot: Date.now(),
             score: 0,
             color: color,
             type: type,
@@ -135,7 +138,7 @@ class GameServer {
                 hp: 5,
                 connected: true //marker for disconnects on clients
             },
-            id: this.generateID()
+            id: localID
         };
         player.socket = socket;
         this.players[player.id] = player;
@@ -149,7 +152,8 @@ class GameServer {
                         id: player.id,
                         color: player.color,
                         type: player.type,
-                        name: player.name
+                        name: player.name,
+                        local: localID == player.id
                     };
                 })
             });
@@ -229,11 +233,15 @@ class GameServer {
                     scoreData.push([player.id, player.score, player.lastHitBy, firer ? firer.score : 0]);
                     player.lastHitBy = null;
                 }
-                return {
+                let syncData = {
                     id: player.id,
                     sync: player.sync,
                     physicsSync: physicsSync
                 };
+                if (!self.inControl(player)) {
+                    syncData.authoritative = true;
+                }
+                return syncData;
             }),
             bullets: this.bullets.map(bullet => ({
                 id: bullet.id,
@@ -250,10 +258,15 @@ class GameServer {
             this.callbacks.sync(syncData);
         }
     }
+    inControl(player) {
+        return Date.now() - player.lastControlLoss > 2000;
+    }
     spawnBullet(player) {
         let bulletID = this.generateID();
         let ms = player.body.getMotionState();
-        if (!ms) return;
+        if (!ms) {
+            console.log("no motion state!");
+        }
 
         ms.getWorldTransform(this.tmpTrans);
 
@@ -280,6 +293,7 @@ class GameServer {
             this.callbacks.spawnBullet({
                 id: bulletID,
                 color: player.color,
+                firer: player.id,
                 mass: mass,
                 from: from,
                 vel: vel
@@ -293,6 +307,7 @@ class GameServer {
             mass: mass,
             firer: player.id
         });
+        //player.body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
         let self = this;
         setTimeout(function() {
             let bulletIndex = self.bullets.findIndex(bullet => bullet.id == bulletID);
