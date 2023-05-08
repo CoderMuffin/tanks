@@ -86,7 +86,7 @@ class GameServer {
 
         this.intervals = [
             setInterval(() => this.ping(), 3000),
-            setInterval(() => this.sync(), 400),
+            setInterval(() => this.sync(), 300),
             setInterval(() => this.step(), 16)
         ];
 
@@ -219,6 +219,7 @@ class GameServer {
         let syncData = {
             players: Object.values(this.players).map(function(player) {
                 let physicsSync = self.physics.getSync(player.body);
+                
                 if (physicsSync && physicsSync.position.y <= -10) {
                     physicsSync.position = { x: 0, y: 0, z: 0 };
                     physicsSync.rotation = { x: 0, y: 0, z: 0, w: 1 };
@@ -232,6 +233,7 @@ class GameServer {
                     
                     scoreData.push([player.id, player.score, player.lastHitBy, firer ? firer.score : 0]);
                     player.lastHitBy = null;
+                    player.lastControlLoss = Date.now();
                 }
                 let syncData = {
                     id: player.id,
@@ -247,10 +249,16 @@ class GameServer {
                 id: bullet.id,
                 sync: this.physics.getSync(bullet.body)
             })),
-            moveableCubes: this.moveableCubes.filter(cube => cube.body.isActive() && cube.position.y >= -10).map(cube => ({
-                id: cube.id,
-                sync: this.physics.getSync(cube.body)
-            }))
+            moveableCubes: this.moveableCubes.reduce(function(acc, cube) {
+                let sync = self.physics.getSync(cube.body);
+                if (cube.body.isActive() && sync.position.y >= -10) {
+                    acc.push({
+                        id: cube.id,
+                        sync: sync
+                    });
+                }
+                return acc;
+            }, [])
         }
 
         syncData.scoreData = scoreData;
