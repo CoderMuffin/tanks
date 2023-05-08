@@ -7,6 +7,7 @@ class GameClient {
             cubes: 0,
         };
         this.emotes = resources.emotes;
+        this.resources = resources;
         this.mode = mode;
         
         this.cubes = {};
@@ -27,6 +28,7 @@ class GameClient {
                         self.physics.remove(player.body);
                         self.scene.remove(player.model);
                         delete self.players[id];
+                        self.updateLeaderboard();
                     }
                     //if server doesn't reset it, either they or we have lost contact
                     player.sync.connected = false;                
@@ -36,6 +38,31 @@ class GameClient {
 
         this.lastTime = Date.now();
         this.animate();
+    }
+
+    updateLeaderboard() {
+        this.resources.leaderboard.innerHTML = "";
+        let players = Object.values(this.players).sort((a, b) => a.score < b.score);
+        for (let i = 0; i < players.length; i++) {
+            let el = document.createElement("div");
+            
+            let elColor = document.createElement("span");
+            elColor.className = "leaderboard-color";
+            elColor.style = "--color: #" + players[i].color.toString(16).padStart(6, "0");
+            el.appendChild(elColor);
+            
+            let elName = document.createElement("span");
+            elName.className = "leaderboard-name";
+            elName.innerText = players[i].name;
+            el.appendChild(elName);
+            
+            let elScore = document.createElement("span");
+            elScore.className = "leaderboard-score";
+            elScore.innerText = players[i].score;
+            el.appendChild(elScore);
+            
+            this.resources.leaderboard.appendChild(el);
+        }
     }
     
     initTHREE(multiplayer) {
@@ -214,6 +241,7 @@ class GameClient {
             name: data.name,
             color: data.color,
             type: data.type,
+            score: data.score,
             body: Util.newPlayerBody(this.physics, data.type),
             lastFetched: Date.now(),
             sync: {
@@ -221,7 +249,9 @@ class GameClient {
                 hp: 5,
                 connected: true //assume connected until we reset otherwise weird stuff happens
             }
-        }
+        };
+
+        this.updateLeaderboard();
     }
 
     tankText(name) {
@@ -297,6 +327,7 @@ class GameClient {
         let text = player.text;
         text.geometry.dispose();
         text.geometry = this.tankText(player.name + ": " + score);
+        this.updateLeaderboard();
     }
 
     hardSync(syncData) {
@@ -307,5 +338,12 @@ class GameClient {
             this.createPlayer(player);
         }
         Util.addCubeBodies(this.physics, Object.values(this.cubes), this.scene);
+        for (var remoteMoveableCube of syncData.moveableCubes) {
+            if (this.cubes[remoteMoveableCube.id]) {
+                this.physics.setSync(this.cubes[remoteMoveableCube.id].body, remoteMoveableCube.sync);
+            } else {
+                console.warn(`No such cube for id "${remoteMoveableCube.id}"`)
+            }
+        }
     }
 }

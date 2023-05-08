@@ -146,6 +146,7 @@ class GameServer {
         if (this.callbacks.hardSync) {
             this.callbacks.hardSync(player, {
                 cubes: this.cubes,
+                moveableCubes: this.serializeMoveable(true),
                 id: player.id,
                 players: Object.values(this.players).map(function(player) {
                     return {
@@ -153,6 +154,7 @@ class GameServer {
                         color: player.color,
                         type: player.type,
                         name: player.name,
+                        score: player.score,
                         local: localID == player.id
                     };
                 })
@@ -164,11 +166,25 @@ class GameServer {
                 id: player.id,
                 color: player.color,
                 type: player.type,
-                name: player.name
+                name: player.name,
+                score: player.score
             });
         }
 
         return player.id;
+    }
+    serializeMoveable(all = false) {
+        let self = this;
+        return this.moveableCubes.reduce(function(acc, cube) {
+            let sync = self.physics.getSync(cube.body);
+            if (all || (cube.body.isActive() && sync.position.y >= -10)) {
+                acc.push({
+                    id: cube.id,
+                    sync: sync
+                });
+            }
+            return acc;
+        }, []);
     }
     removePlayer(playerID) {
         //clients delete it in their own time
@@ -249,16 +265,7 @@ class GameServer {
                 id: bullet.id,
                 sync: this.physics.getSync(bullet.body)
             })),
-            moveableCubes: this.moveableCubes.reduce(function(acc, cube) {
-                let sync = self.physics.getSync(cube.body);
-                if (cube.body.isActive() && sync.position.y >= -10) {
-                    acc.push({
-                        id: cube.id,
-                        sync: sync
-                    });
-                }
-                return acc;
-            }, [])
+            moveableCubes: this.serializeMoveable()
         }
 
         syncData.scoreData = scoreData;
