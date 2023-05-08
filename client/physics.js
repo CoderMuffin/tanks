@@ -28,7 +28,7 @@ class Physics {
         let motionState = new Ammo.btDefaultMotionState(transform);
 
         let colShape = new Ammo.btBoxShape(scale);
-        colShape.setMargin(0.05);
+        //colShape.setMargin(0.05);
 
         let localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(mass, localInertia);
@@ -49,7 +49,7 @@ class Physics {
         let motionState = new Ammo.btDefaultMotionState(transform);
 
         let colShape = new Ammo.btSphereShape(radius);
-        colShape.setMargin(0.05);
+        //colShape.setMargin(0.05);
 
         let localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(mass, localInertia);

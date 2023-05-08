@@ -13,6 +13,7 @@ var elHelpDialog = document.getElementById("help-dialog");
 var elTankClass = document.getElementById("tank-class");
 var elMobileButton = document.getElementById("enable-mobile-button");
 var elMobileControls = document.getElementById("mobile-controls");
+var elLeaderboard = document.getElementById("leaderboard");
 
 var demoTank = null;
 var socket = io();
@@ -96,7 +97,9 @@ function loadResources() {
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/thumbs-up-2.png'), transparent: true }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/nerd-emote.jpg') }),
         new THREE.MeshBasicMaterial({ map: (new THREE.TextureLoader()).load('img/moai.png'), transparent: true })
-    ]
+    ];
+
+    gameResources.leaderboard = document.getElementById("leaderboard-content");
 }
 
 loadResources();
@@ -261,6 +264,7 @@ function joinGame() {
         name: elTankName.value
     };
     elLoading.style.opacity = "0";
+    elLeaderboard.style.display = "block";
     elMobileButton.style.display = "inline-block";
     showToast(`Joining game "${gameID}"`);
     game.removeDemoTank();
