@@ -23,6 +23,8 @@ var localServer = null;
 
 var gameResources = {};
 
+var joining = false;
+
 class Chooser {
     constructor(contentID, data, startPos = 0) {
         this.elContent = document.getElementById(contentID);
@@ -164,6 +166,7 @@ socket.on("verify-game-result", function(exists) {
     if (!exists) {
         showToast(`Cannot join game '${gameID}' as it does not exist!`);
         cancelJoin();
+        joining = false;
     } else {
         prepareJoin();
     }
@@ -276,6 +279,7 @@ function startJoin() {
 
 let joiningPlayer1 = true;
 function joinGame() {
+    if (joining) return;
     let joinData = {
         id: gameID.toString(),
         type: tankClassChooser.value,
@@ -288,6 +292,7 @@ function joinGame() {
     showToast(`Joining game "${gameID}"`);
     game.removeDemoTank();
     socket.emit("join-game", joinData);
+    joining = true;
 }
 
 function updateWasd(wasd) {

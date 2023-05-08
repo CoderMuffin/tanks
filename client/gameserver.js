@@ -13,7 +13,17 @@ class GameServer {
                 friction: 0.8,
                 mass: mass,
                 texture: mass == 0 ? 0 : 1
-            }
+            };
+        }
+        function deepCube(x, z, size) {
+            return {
+                position: { x: x, y: -0.5, z: z },
+                rotation: { x: 0, y: 0, z: 0 },
+                size: { x: size, y: size * 2, z: size },
+                friction: 0.8,
+                mass: 0,
+                texture: 0
+            };
         }
         function ring(fn, args, radius, step, excepts) {
             let result = [];
@@ -60,10 +70,10 @@ class GameServer {
                 mass: 0,
                 texture: 0
             },
-            simpleCube(4, 4, 2, 0),
-            simpleCube(-4, 4, 2, 0),
-            simpleCube(4, -4, 2, 0),
-            simpleCube(-4, -4, 2, 0),
+            deepCube(4, 4, 2, 0),
+            deepCube(-4, 4, 2, 0),
+            deepCube(4, -4, 2, 0),
+            deepCube(-4, -4, 2, 0),
 
             simpleCube(0, 4, 2, 20),
             simpleCube(0, -4, 2, 20),
@@ -89,7 +99,8 @@ class GameServer {
                 friction: 0.5,
                 mass: 0,
                 texture: 0
-            }
+            },
+            ...ring(simpleCube, [0.8, 20], 9, 1, [])
         ]][mapID];
         for (var cube of this.cubes) {
             cube.id = this.generateID();
