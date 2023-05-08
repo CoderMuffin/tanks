@@ -67,7 +67,7 @@ class Physics {
         return body;
     }
     step(deltaTime) {
-        const fixedDeltaTime = 15; //20ms
+        const fixedDeltaTime = 15; //ms
 
         this.timeAcc += deltaTime;
         while (this.timeAcc >= fixedDeltaTime) {

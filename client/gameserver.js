@@ -4,7 +4,7 @@ if (typeof module == "object") {
 }
 
 class GameServer {
-    constructor(ammo, callbacks) {
+    constructor(ammo, callbacks, mapID = 0) {
         function simpleCube(x, z, size, mass) {
             return {
                 position: { x: x, y: size / 2 - 0.5, z: z },
@@ -51,7 +51,7 @@ class GameServer {
         }
         this.callbacks = callbacks;
         this.players = {};
-        this.cubes = [
+        this.cubes = [[
             {
                 position: { x: 0, y: -1, z: 0 },
                 rotation: { x: 0, y: 0, z: 0 },
@@ -72,7 +72,25 @@ class GameServer {
 
             ...ring(simpleCube, [2, 20], 8, 2, [{ x: 0, z: 8 }, { x: 8, z: 0 }, { x: 0, z: -8 }, { x: -8, z: 0 }]),
             ...ring(simpleCube, [4, 30], 14, 4, [])
-        ];
+        ], [
+            {
+                position: { x: 0, y: -1, z: 0 },
+                rotation: { x: 0, y: 0, z: 0 },
+                size: { x: 40, y: 1, z: 40 },
+                friction: 0.5,
+                mass: 0,
+                texture: 0
+            }
+        ], [
+            {
+                position: { x: 0, y: -1, z: 0 },
+                rotation: { x: 0, y: 0, z: 0 },
+                size: { x: 20, y: 1, z: 20 },
+                friction: 0.5,
+                mass: 0,
+                texture: 0
+            }
+        ]][mapID];
         for (var cube of this.cubes) {
             cube.id = this.generateID();
         }

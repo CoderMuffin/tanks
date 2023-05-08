@@ -10,7 +10,6 @@ var elTankColor = document.getElementById("tank-color");
 var elTankColorButton = document.getElementById("tank-color-button");
 var elTankName = document.getElementById("tank-name");
 var elHelpDialog = document.getElementById("help-dialog");
-var elTankClass = document.getElementById("tank-class");
 var elMobileButton = document.getElementById("enable-mobile-button");
 var elMobileControls = document.getElementById("mobile-controls");
 var elLeaderboard = document.getElementById("leaderboard");
@@ -24,24 +23,41 @@ var localServer = null;
 
 var gameResources = {};
 
-var tankClass = 1;
-var tankClassNames = [
+class Chooser {
+    constructor(contentID, data, startPos = 0) {
+        this.elContent = document.getElementById(contentID);
+        this.data = data;
+        this.value = startPos;
+    }
+    next() {
+        let self = this;
+        self.value++;
+        while (self.value >= self.data.length) {
+            self.value -= self.data.length;
+        }
+        self.elContent.innerText = self.data[self.value];
+    }
+    prev() {
+        let self = this;
+        self.value--;
+        while (self.value < 0) {
+            self.value += self.data.length;
+        }
+        self.elContent.innerText = self.data[self.value];
+    }
+}
+
+let tankClassChooser = new Chooser("tank-class", [
     "Light",
     "Medium",
     "Heavy"
-];
+], 1);
 
-function changeTankClass(change) {
-    tankClass += change;
-    while (tankClass >= tankClassNames.length) {
-        tankClass -= tankClassNames.length;
-    }
-    while (tankClass < 0) {
-        tankClass += tankClassNames.length;
-    }
-    elTankClass.innerText = tankClassNames[tankClass];
-}
-
+let mapChooser = new Chooser("map", [
+    "Standard",
+    "Flat",
+    "Small flat"
+]);
 
 function registerMobileButtons() {
     let grid = document.getElementById("mobile-wasd-grid");
@@ -218,7 +234,10 @@ function toggleHelp() {
 
 function createGame() {
     gameID = elGameId.value;
-    socket.emit("new-game", gameID.toString());
+    socket.emit("new-game", {
+        id: gameID.toString(),
+        mapID: mapChooser.value
+    });
     elLoading.style.opacity = "1";
     setTimeout(function() {
         window.location.replace(window.location.origin + window.location.pathname + `?game=${gameID}`);
@@ -259,7 +278,7 @@ let joiningPlayer1 = true;
 function joinGame() {
     let joinData = {
         id: gameID.toString(),
-        type: tankClass,
+        type: tankClassChooser.value,
         color: elTankColor.value,
         name: elTankName.value
     };

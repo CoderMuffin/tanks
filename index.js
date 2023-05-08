@@ -61,8 +61,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on("new-game", async function(id) {
-        id = id.toString();
+    socket.on("new-game", async function(data) {
+        let id = data.id.toString();
 
         if (games.get(id)) {
             socket.emit("failure", `Cannot create game "${id}": game already exists!`);
@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
                 emit(game, "add-player", data);
             },
             hit: function(data) {}
-        });
+        }, data.mapID);
         games.set(id, game);
         console.log("Games open: " + games.size);
     });
