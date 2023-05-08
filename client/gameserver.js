@@ -312,9 +312,9 @@ class GameServer {
         this.tmpVec.normalize();
         let vel = { x: this.tmpVec.x(), y: this.tmpVec.y(), z: this.tmpVec.z() };
 
-        from.x += vel.x * 0.75;
-        from.y += vel.y * 0.75;
-        from.z += vel.z * 0.75;
+        from.x += vel.x * 0.8;
+        from.y += vel.y * 0.8;
+        from.z += vel.z * 0.8;
 
         vel.x *= speed;
         vel.y *= speed;
