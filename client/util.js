@@ -250,7 +250,10 @@ const Util = {
 
 if (typeof THREE == "object") {
     Util.cubeMaterials = [
-        new THREE.MeshPhongMaterial({ color: 0xcccccc, shininess: 0 }),
+        new THREE.MeshPhongMaterial({ 
+            map: (new THREE.TextureLoader()).load('img/ston3.jpg'),
+            shininess: 0
+        }),
         new THREE.MeshPhongMaterial({
             map: (new THREE.TextureLoader()).load('img/wood.jpg'),
             shininess: 50
