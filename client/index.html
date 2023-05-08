@@ -10,24 +10,29 @@
 <body>
     <div id="debug"></div>
     <div id="create-dialog" style="background-color: var(--theme-normal)">
-        <h1>Muffin tanks</h1>
-        <input placeholder="Game ID" class="text-input" id="game-id"></input>
-        <h2>Create game</h2>
-        <div>
-            <!--<button class="button-wide" onclick="createGameLocal()">Local multiplayer</button>-->
-            <button class="button-wide" onclick="createGame()">Create</button>
-        </div>
-        <h3>Join game</h3>
-        <div>
-            <button class="button-wide" onclick="startJoin()">Join</button>
+        <div class="dialog-container">
+            <h1 class="center-title">Muffin tanks</h1>
+            <input style="width: 100%;" placeholder="Game ID" class="text-input" id="game-id"></input>
+            <h2 class="center-title">Create game</h2>
+            <div>
+                <div class="chooser">
+                    <button onclick="mapChooser.prev()">&lt;</button><span id="map">Standard</span><button onclick="mapChooser.next()">&gt;</button>
+                </div>
+                <!--<button class="button-wide" onclick="createGameLocal()">Local multiplayer</button>-->
+                <button style="width: 100%;" class="button-wide" onclick="createGame()">Create</button>
+            </div>
+            <h2 class="center-title">Join game</h2>
+            <div>
+                <button style="width: 100%;" class="button-wide" onclick="startJoin()">Join</button>
+            </div>
         </div>
     </div>
     <div id="join-dialog" style="display: none;">
-        <div style="max-width: 90vw; width: 20vmax;">
+        <div class="dialog-container">
             <h1 style="margin-bottom: 0">Customise tank<span id="player-display"></span></h1>
             <h3 style="margin-bottom: 20vh;">Joining game '<span id="game-id-display"></span>'</h3>
-            <div id="tank-class-container">
-                <button onclick="changeTankClass(-1)">&lt;</button><span id="tank-class">Medium</span><button onclick="changeTankClass(1)">&gt;</button>
+            <div class="chooser">
+                <button onclick="tankClassChooser.prev()">&lt;</button><span id="tank-class">Medium</span><button onclick="tankClassChooser.next()">&gt;</button>
             </div>
             <div style="width: 100%; margin-bottom: 8px;">
                 <input id="tank-name" class="text-input" autocomplete="off" placeholder="Name"/><button id="tank-color-button" onclick="elTankColor.click()">Color</button><input style="display: none" id="tank-color" type="color" value="#ff0000" />
@@ -42,7 +47,9 @@
             <p>
                 Use the WASD keys or arrow keys to move the tank. W and S (or up and down)
                 will move the tank forward and back, and A and D (or left and right) will spin
-                the tank. Use Space to fire
+                the tank. Use Space to fire.
+                <br/>
+                The number keys 1-6 can be used for emotes.
             </p>
             <h3>About</h3>
             <p>

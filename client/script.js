@@ -10,7 +10,6 @@ var elTankColor = document.getElementById("tank-color");
 var elTankColorButton = document.getElementById("tank-color-button");
 var elTankName = document.getElementById("tank-name");
 var elHelpDialog = document.getElementById("help-dialog");
-var elTankClass = document.getElementById("tank-class");
 var elMobileButton = document.getElementById("enable-mobile-button");
 var elMobileControls = document.getElementById("mobile-controls");
 var elLeaderboard = document.getElementById("leaderboard");
@@ -24,24 +23,41 @@ var localServer = null;
 
 var gameResources = {};
 
-var tankClass = 1;
-var tankClassNames = [
+class Chooser {
+    constructor(contentID, data, startPos = 0) {
+        this.elContent = document.getElementById(contentID);
+        this.data = data;
+        this.value = startPos;
+    }
+    next() {
+        let self = this;
+        self.value++;
+        while (self.value >= self.data.length) {
+            self.value -= self.data.length;
+        }
+        self.elContent.innerText = self.data[self.value];
+    }
+    prev() {
+        let self = this;
+        self.value--;
+        while (self.value < 0) {
+            self.value += self.data.length;
+        }
+        self.elContent.innerText = self.data[self.value];
+    }
+}
+
+let tankClassChooser = new Chooser("tank-class", [
     "Light",
     "Medium",
     "Heavy"
-];
+], 1);
 
-function changeTankClass(change) {
-    tankClass += change;
-    while (tankClass >= tankClassNames.length) {
-        tankClass -= tankClassNames.length;
-    }
-    while (tankClass < 0) {
-        tankClass += tankClassNames.length;
-    }
-    elTankClass.innerText = tankClassNames[tankClass];
-}
-
+let mapChooser = new Chooser("map", [
+    "Standard",
+    "Flat",
+    "Small flat"
+]);
 
 function registerMobileButtons() {
     let grid = document.getElementById("mobile-wasd-grid");
@@ -218,7 +234,10 @@ function toggleHelp() {
 
 function createGame() {
     gameID = elGameId.value;
-    socket.emit("new-game", gameID.toString());
+    socket.emit("new-game", {
+        id: gameID.toString(),
+        mapID: mapChooser.value
+    });
     elLoading.style.opacity = "1";
     setTimeout(function() {
         window.location.replace(window.location.origin + window.location.pathname + `?game=${gameID}`);
@@ -259,7 +278,7 @@ let joiningPlayer1 = true;
 function joinGame() {
     let joinData = {
         id: gameID.toString(),
-        type: tankClass,
+        type: tankClassChooser.value,
         color: elTankColor.value,
         name: elTankName.value
     };
@@ -282,19 +301,29 @@ function updateWasd(wasd) {
         });
     }
 }
-
+function calcWasd(inputs) {
+    return {
+        x: (inputs.right ? 1 : 0) - (inputs.left ? 1 : 0),
+        y: (inputs.up ? 1 : 0) - (inputs.down ? 1 : 0)
+    };
+}
 let shootCooldown = Date.now();
 let wasd = { x: 0, y: 0 };
+let inputs = {
+    left: false,
+    right: false,
+    up: false,
+    down: false
+};
 window.addEventListener("keydown", function(e) {
-    let newWasd = { x: wasd.x, y: wasd.y };
     if (e.code == "KeyA" || e.code == "ArrowLeft") {
-        newWasd.x = -1;
+        inputs.left = true;
     } else if (e.code == "KeyD" || e.code == "ArrowRight") {
-        newWasd.x = 1;
+        inputs.right = true;
     } else if (e.code == "KeyW" || e.code == "ArrowUp") {
-        newWasd.y = 1;
+        inputs.up = true;
     } else if (e.code == "KeyS" || e.code == "ArrowDown") {
-        newWasd.y = -1;
+        inputs.down = true;
     } else if (e.code == "Space" && !e.repeat) {
         socket.emit("spawn-bullet-start");
         return; //prevent WASD update
@@ -305,10 +334,27 @@ window.addEventListener("keydown", function(e) {
             
         }
     }
+    let newWasd = calcWasd(inputs);
     if (newWasd.x != wasd.x || newWasd.y != wasd.y) {
         wasd = newWasd;
         updateWasd(wasd);
     }
+});
+window.addEventListener("keyup", function(e) {
+    if (e.code == "KeyA" || e.code == "ArrowLeft") {
+        inputs.left = false;
+    } else if (e.code == "KeyD" || e.code == "ArrowRight") {
+        inputs.right = false;
+    } else if (e.code == "KeyW" || e.code == "ArrowUp") {
+        inputs.up = false;
+    } else if (e.code == "KeyS" || e.code == "ArrowDown") {
+        inputs.down = false;
+    } else if (e.code == "Space") {
+        socket.emit("spawn-bullet-end");
+    }
+    let newWasd = calcWasd(inputs);
+    wasd = newWasd;
+    updateWasd(wasd);
 });
 window.addEventListener("keypress", function(e) {
     //i know this can be optimised
@@ -331,20 +377,6 @@ window.addEventListener("keypress", function(e) {
     if (e.code == "Digit6") {
         socket.emit("emote", 5);
     }
-})
-window.addEventListener("keyup", function(e) {
-    if (e.code == "KeyA" || e.code == "ArrowLeft") {
-        wasd.x = 0;
-    } else if (e.code == "KeyD" || e.code == "ArrowRight") {
-        wasd.x = 0;
-    } else if (e.code == "KeyW" || e.code == "ArrowUp") {
-        wasd.y = 0;
-    } else if (e.code == "KeyS" || e.code == "ArrowDown") {
-        wasd.y = 0;
-    } else if (e.code == "Space") {
-        socket.emit("spawn-bullet-end");
-    }
-    updateWasd(wasd);
 });
 
 function showToast(message) {

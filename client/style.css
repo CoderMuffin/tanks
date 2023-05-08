@@ -151,16 +151,27 @@ html, body {
     bottom: 0;
 }
 
-#tank-class-container {
+.chooser {
     margin-bottom: 8px;
 }
 
-#tank-class-container > button {
+.dialog-container {
+    max-width: 90vw;
+    min-width: 150px;
+    width: 20vmax;
+}
+
+.center-title {
+    text-align: center;
+    width: 100%;
+}
+
+.chooser > button {
     width: 40px;
     height: 40px;
 }
 
-#tank-class {
+.chooser > span {
     display: inline-block;
     font-size: 1.2em;
     text-align: center;
