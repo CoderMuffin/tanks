@@ -18,9 +18,9 @@ const Util = {
         {
             weight: 1,
             cooldown: 300,
-            bulletMass: 0.5,
+            bulletMass: 1,
             speed: 1,
-            turnSpeed: 0.6,
+            turnSpeed: 0.8,
             bulletSpeed: 25,
             ammo: Infinity,
             ammoCooldown: 0
@@ -28,9 +28,9 @@ const Util = {
         {
             weight: 1.5,
             cooldown: 200,
-            bulletMass: 2.5,
+            bulletMass: 3,
             speed: 1.25,
-            turnSpeed: 0.9,
+            turnSpeed: 1,
             bulletSpeed: 20,
             ammo: Infinity,
             ammoCooldown: 0
@@ -40,7 +40,7 @@ const Util = {
             cooldown: 700,
             bulletMass: 6,
             speed: 1.75,
-            turnSpeed: 1.6,
+            turnSpeed: 1.8,
             bulletSpeed: 20,
             ammo: Infinity,
             ammoCooldown: 0
@@ -102,7 +102,7 @@ const Util = {
             
             if (player.sync.wasd.x != 0) {
                 //player.body.activate(true);
-                let turnSpeedScale = 1 - Math.abs(player.sync.wasd.y) * 0.3;
+                let turnSpeedScale = 1 - Math.abs(player.sync.wasd.y) * 0.4;
                 Util.tmpVec.setValue(0, -(player.sync.wasd.x * turnSpeedScale) * deltaTime / 5 * Util.tankData[player.type].turnSpeed, 0);
                 player.body.applyTorque(Util.tmpVec);
             }

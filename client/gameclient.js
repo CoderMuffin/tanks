@@ -220,7 +220,7 @@ class GameClient {
         cube.castShadow = true;
         meshGroup.add(cube);
         
-        let fontGeometry = this.tankText(data.name + ": 0");
+        let fontGeometry = this.tankText(data.name + ": " + data.score);
         let text = new THREE.Mesh(fontGeometry, material);
         text.position.set(0, 0.5, 0);
         text.scale.set(0.2, 0.2, 0.2);

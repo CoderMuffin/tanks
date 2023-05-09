@@ -119,7 +119,8 @@ io.on('connection', (socket) => {
         if (!player) return;
         player.sync.wasd = data.wasd;
         if (game.inControl(player)) {
-            game.physics.lerpSync(player.body, data.sync, 0.2);
+            //game.physics.lerpSync(player.body, data.sync, 0.2);
+            game.physics.setSync(player.body, data.sync);
         }
     });
 
