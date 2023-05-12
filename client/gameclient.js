@@ -144,7 +144,7 @@ class GameClient {
             model: mesh
         }
         let self = this;
-        // this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
+        this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);

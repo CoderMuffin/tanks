@@ -351,7 +351,7 @@ class GameServer {
             mass: mass,
             firer: player.id
         });
-        //player.body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
+        player.body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
         let self = this;
         setTimeout(function() {
             let bulletIndex = self.bullets.findIndex(bullet => bullet.id == bulletID);
