@@ -42,7 +42,7 @@ class GameClient {
 
     updateLeaderboard() {
         this.resources.leaderboard.innerHTML = "";
-        let players = Object.values(this.players).sort((a, b) => a.score < b.score);
+        let players = Object.values(this.players).sort((a, b) => b.score - a.score);
         for (let i = 0; i < players.length; i++) {
             let el = document.createElement("div");
             
