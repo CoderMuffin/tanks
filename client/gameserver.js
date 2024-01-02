@@ -115,7 +115,7 @@ class GameServer {
 
         this.intervals = [
             setInterval(() => this.ping(), 3000),
-            setInterval(() => this.sync(), 300),
+            setInterval(() => this.sync(), 250),
             setInterval(() => this.step(), 16)
         ];
 

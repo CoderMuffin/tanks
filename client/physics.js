@@ -59,6 +59,8 @@ class Physics {
 
         body.setFriction(4);
         body.setRollingFriction(10);
+        body.setCcdMotionThreshold(0.001);
+        body.setCcdSweptSphereRadius(0.2);
 
         if (alwaysAwake) {
             body.setActivationState(4);
