@@ -13,10 +13,10 @@ Ammo().then(function(_ammo) {
 });
 var games = new Map();
 
-app.use(express.static("client"));
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/client/index.html');
 });
+app.use(express.static(__dirname + "/client"));
 
 io.on('connection', (socket) => {
     let gameID = null;
@@ -139,8 +139,8 @@ io.on('connection', (socket) => {
     })
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(9211, () => {
+    console.log('listening on *:9211');
 });
 
 
