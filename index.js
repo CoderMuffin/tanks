@@ -3,7 +3,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const io = new Server(server, { path: "/tanks/socket.io" });
 
 const GameServer = require("./client/gameserver.js");
 const Ammo = require("./client/muffin_ammo.js");
@@ -13,10 +13,10 @@ Ammo().then(function(_ammo) {
 });
 var games = new Map();
 
-app.get('/', (req, res) => {
+app.get('/tanks', (req, res) => {
     res.sendFile(__dirname + '/client/index.html');
 });
-app.use(express.static(__dirname + "/client"));
+app.use('/tanks', express.static(__dirname + "/client"));
 
 io.on('connection', (socket) => {
     let gameID = null;
@@ -139,8 +139,9 @@ io.on('connection', (socket) => {
     })
 });
 
-server.listen(9211, () => {
-    console.log('listening on *:9211');
+const port = 9001;
+server.listen(port, () => {
+    console.log('listening on *:' + port);
 });
 
 

@@ -15,7 +15,7 @@ var elMobileControls = document.getElementById("mobile-controls");
 var elLeaderboard = document.getElementById("leaderboard");
 
 var demoTank = null;
-var socket = io();
+var socket = io("", { path: "/tanks/socket.io" });
 var gameID = null;
 var game = null;
 
