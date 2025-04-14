@@ -197,7 +197,8 @@ socket.on("emote", function(data) {
     game.emote(data.id, data.emote);
 })
 
-function createGameLocal() {
+async function createGameLocal() {
+    while (!ammo) await new Promise(resolve => setTimeout(resolve, 100));
     let mode = "2Poffline";
     prepareJoin(mode);
     game.removeDemoTank();
@@ -247,7 +248,8 @@ function createGame() {
     }, 500);
 }
 
-function prepareJoin(mode) {
+async function prepareJoin(mode) {
+    while (!ammo) await new Promise(resolve => setTimeout(resolve, 100));
     game = new GameClient(gameResources, ammo, mode);
     elLoading.style.opacity = "0";
     if (gameID === null) {
