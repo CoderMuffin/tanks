@@ -156,9 +156,9 @@ html, body {
 }
 
 .dialog-container {
-    max-width: 90vw;
-    min-width: 150px;
-    width: 20vmax;
+    min-width: 300px;
+    width: 50vw;
+    max-width: 500px
 }
 
 .center-title {
