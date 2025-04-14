@@ -86,6 +86,9 @@ class GameClient {
             renderer.domElement.className = "game-canvas";
             renderer.domElement.style.left = 100 / cameraCount * i;
             renderer.domElement.style.right = 100 - 100 / cameraCount * (i + 1);
+            renderer.domElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+            });
             document.body.appendChild(renderer.domElement);
             this.cameras.push({
                 camera: new THREE.PerspectiveCamera(75, window.innerWidth / cameraCount / window.innerHeight, 0.1, 1000),
