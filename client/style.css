@@ -149,7 +149,7 @@ html, body {
     margin-bottom: 8px;
 }
 
-.dialog-container {
+.dialog-container, #help-dialog-inner {
     min-width: 300px;
     width: 50vw;
     max-width: 500px

@@ -181,9 +181,6 @@ socket.on("reconnect", function() {
 socket.on("failure", function(message) {
     showToast("Error: " + message);
 });
-socket.on("hit", function(data) {
-    game.hit(data);
-});
 socket.on("connect", function() {
     showToast("Connected to server");
     let gameIDurl = params.get("game");

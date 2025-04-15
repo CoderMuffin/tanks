@@ -148,6 +148,7 @@ class GameClient {
         }
         let self = this;
         this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
+        ball.setIgnoreCollisionCheck(this.players[data.firer].body, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);
@@ -203,10 +204,6 @@ class GameClient {
             }
             camera.renderer.render(this.scene, camera.camera);
         }
-    }
-
-    hit() {
-        
     }
 
     createPlayer(data) {
