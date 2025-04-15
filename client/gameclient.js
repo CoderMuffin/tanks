@@ -4,6 +4,8 @@ class GameClient {
         this.tankGeometry = resources.tankGeometry;
         this.elDebug = document.getElementById("debug");
         this.debug = {
+            frames: 0,
+            frameRate: 0,
             cubes: 0,
         };
         this.emotes = resources.emotes;
@@ -35,6 +37,11 @@ class GameClient {
                 }
             }, 3000);
         }
+
+        setInterval(function() {
+            self.debug.frameRate = Math.round(self.debug.frames / 3);
+            self.debug.frames = 0;
+        }, 2000);
 
         this.lastTime = Date.now();
         this.animate();
@@ -86,6 +93,9 @@ class GameClient {
             renderer.domElement.className = "game-canvas";
             renderer.domElement.style.left = 100 / cameraCount * i;
             renderer.domElement.style.right = 100 - 100 / cameraCount * (i + 1);
+            renderer.domElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+            });
             document.body.appendChild(renderer.domElement);
             this.cameras.push({
                 camera: new THREE.PerspectiveCamera(75, window.innerWidth / cameraCount / window.innerHeight, 0.1, 1000),
@@ -145,6 +155,7 @@ class GameClient {
         }
         let self = this;
         this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
+        ball.setIgnoreCollisionCheck(this.players[data.firer].body, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);
@@ -153,11 +164,13 @@ class GameClient {
     }
 
     animate() {
+        this.debug.frames++;
+
         let now = Date.now();
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        this.elDebug.innerText = `fps ${Math.round(1/deltaTime*1000)} cubes ${this.debug.cubes}`;
+        this.elDebug.innerText = `fps ${this.debug.frameRate} cubes ${this.debug.cubes}`;
         this.physics.step(deltaTime);
         requestAnimationFrame(() => this.animate());
 
@@ -200,10 +213,6 @@ class GameClient {
             }
             camera.renderer.render(this.scene, camera.camera);
         }
-    }
-
-    hit() {
-        
     }
 
     createPlayer(data) {
@@ -278,7 +287,7 @@ class GameClient {
             
             let forceSync = !this.localIDs.includes(remotePlayer.id) || remotePlayer.authoritative;
             
-            if (forceSync) {
+            if (forceSync || true) {
                 this.players[remotePlayer.id].sync = remotePlayer.sync;
                 this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
             } else {

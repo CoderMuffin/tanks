@@ -12,6 +12,8 @@
 html, body {
     touch-action: none;
     overscroll-behavior: contain;
+    margin: 0;
+    padding: 0;
 }
 
 #leaderboard {
@@ -143,22 +145,14 @@ html, body {
     z-index: 30;
 }
 
-.game-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
 .chooser {
     margin-bottom: 8px;
 }
 
-.dialog-container {
-    max-width: 90vw;
-    min-width: 150px;
-    width: 20vmax;
+.dialog-container, #help-dialog-inner {
+    min-width: 300px;
+    width: 50vw;
+    max-width: 500px
 }
 
 .center-title {

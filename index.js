@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const GameServer = require("./client/gameserver.js");
-const Ammo = require("./client/muffin_ammo.js");
+const Ammo = require("./client/lib/muffin_ammo.js");
 var ammo;
 Ammo().then(function(_ammo) {
     ammo = _ammo;

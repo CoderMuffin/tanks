@@ -69,24 +69,25 @@ class Physics {
         return body;
     }
     step(deltaTime) {
-        const fixedDeltaTime = 15; //ms
+        const fixedDeltaTime = 16; //ms
 
         this.timeAcc += deltaTime;
         while (this.timeAcc >= fixedDeltaTime) {
             this.physicsWorld.stepSimulation(fixedDeltaTime);
             this.timeAcc -= fixedDeltaTime;
-        }
-
-        if (this.onCollision != null) {
-            let numManifolds = this.dispatcher.getNumManifolds();
-            for (let i = 0; i < numManifolds; i++) {
-                let contactManifold = this.dispatcher.getManifoldByIndexInternal(i);
-                this.onCollision(
-                    this.ammo.castObject(contactManifold.getBody0(), this.ammo.btRigidBody),
-                    this.ammo.castObject(contactManifold.getBody1(), this.ammo.btRigidBody)
-                );
+            
+            if (this.onCollision != null) {
+                let numManifolds = this.dispatcher.getNumManifolds();
+                for (let i = 0; i < numManifolds; i++) {
+                    let contactManifold = this.dispatcher.getManifoldByIndexInternal(i);
+                    this.onCollision(
+                        this.ammo.castObject(contactManifold.getBody0(), this.ammo.btRigidBody),
+                        this.ammo.castObject(contactManifold.getBody1(), this.ammo.btRigidBody)
+                    );
+                }
             }
         }
+        
     }
     remove(body) {
         this.physicsWorld.removeRigidBody(body);
