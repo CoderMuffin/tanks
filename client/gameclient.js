@@ -33,15 +33,16 @@ class GameClient {
                         self.updateLeaderboard();
                     }
                     //if server doesn't reset it, either they or we have lost contact
-                    player.sync.connected = false;                
+                    player.sync.connected = false;
                 }
             }, 3000);
         }
 
         setInterval(function() {
-            self.debug.frameRate = Math.round(self.debug.frames / 3);
+            self.debug.frameRate = self.debug.frames;
+            self.elDebug.innerText = `fps ${self.debug.frameRate} cubes ${self.debug.cubes}`;
             self.debug.frames = 0;
-        }, 2000);
+        }, 1000);
 
         this.lastTime = Date.now();
         this.animate();
@@ -170,7 +171,6 @@ class GameClient {
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        this.elDebug.innerText = `fps ${this.debug.frameRate} cubes ${this.debug.cubes}`;
         this.physics.step(deltaTime);
         requestAnimationFrame(() => this.animate());
 
