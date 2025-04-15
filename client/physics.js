@@ -68,12 +68,15 @@ class Physics {
         this.physicsWorld.addRigidBody(body);
         return body;
     }
-    step(deltaTime) {
+    step(deltaTime, onStep) {
         const fixedDeltaTime = 16; //ms
 
         this.timeAcc += deltaTime;
         while (this.timeAcc >= fixedDeltaTime) {
             this.physicsWorld.stepSimulation(fixedDeltaTime);
+            if (onStep) {
+                onStep(fixedDeltaTime);
+            }
             this.timeAcc -= fixedDeltaTime;
             
             if (this.onCollision != null) {
@@ -87,7 +90,6 @@ class Physics {
                 }
             }
         }
-        
     }
     remove(body) {
         this.physicsWorld.removeRigidBody(body);
@@ -128,7 +130,7 @@ class Physics {
         }
         return null;
     }
-    lerpSync(body, syncData, by) {
+    lerpSync(body, syncData, by, byRotation) {
         let ms = body.getMotionState();
         if (ms) {
             ms.getWorldTransform(this.tmpTrans);
@@ -141,12 +143,26 @@ class Physics {
 
             let q = this.tmpTrans.getRotation();
             let oldRotation = { x: q.x(), y: q.y(), z: q.z(), w: q.w() };
-            Util.lerpSyncQuat(oldRotation, syncData.rotation, by);
+            Util.lerpSyncQuat(oldRotation, syncData.rotation, byRotation);
             this.tmpQuat.setValue(oldRotation.x, oldRotation.y, oldRotation.z, oldRotation.w);
             this.tmpTrans.setRotation(this.tmpQuat);
             
             body.setWorldTransform(this.tmpTrans);
         }
+
+        // hack: may need to delete this if it plays up
+
+        let vel = body.getLinearVelocity();
+        let oldVel = { x: vel.x(), y: vel.y(), z: vel.z() };
+        Util.lerpSyncVec(oldVel, syncData.velocity, by * 3);
+        this.tmpVec.setValue(oldVel.x, oldVel.y, oldVel.z);
+        body.setLinearVelocity(this.tmpVec);
+
+        let angVel = body.getAngularVelocity();
+        let oldAngVel = { x: angVel.x(), y: angVel.y(), z: angVel.z() };
+        Util.lerpSyncVec(oldAngVel, syncData.angularVelocity, by * 3);
+        this.tmpVec.setValue(oldAngVel.x, oldAngVel.y, oldAngVel.z);
+        body.setAngularVelocity(this.tmpVec);
     }
 }
 

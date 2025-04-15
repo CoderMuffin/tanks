@@ -74,6 +74,10 @@ const Util = {
             Util.tankData[type].weight,
             true
         );
+        
+        box.setFriction(0);
+        box.setRollingFriction(0);
+        
         Util.setPlayerControl(box, true);
         return box;
     },
@@ -83,7 +87,7 @@ const Util = {
         if (Util.tmpTrans == null) Util.tmpTrans = new ammo.btTransform();
     },
     setPlayerControl(body, inControl) {
-        body.setDamping(inControl ? 0.8 : 0.3, inControl ? 0.999 : 0.3);
+        body.setDamping(inControl ? 0.99 : 0, inControl ? 0.999 : 0);
     },
     stepPlayer(ammo, player, deltaTime) {
         Util.prepareTmps(ammo);
@@ -94,16 +98,15 @@ const Util = {
             Util.getFacingFromQuaternion(q, Util.tmpVec);
             if (player.sync.wasd.y == 1) {
                 //player.body.activate(true);
-                player.body.applyCentralForce(Util.tmpVec.op_mul(deltaTime / 2 * Util.tankData[player.type].speed));
+                player.body.applyCentralForce(Util.tmpVec.op_mul(14 * Util.tankData[player.type].speed));
             } else if (player.sync.wasd.y == -1) {
                 //player.body.activate(true);
-                player.body.applyCentralForce(Util.tmpVec.op_mul(-deltaTime / 2 * Util.tankData[player.type].speed));
-            } 
+                player.body.applyCentralForce(Util.tmpVec.op_mul(-14 * Util.tankData[player.type].speed));
+            }
             
             if (player.sync.wasd.x != 0) {
                 //player.body.activate(true);
-                let turnSpeedScale = 1 - Math.abs(player.sync.wasd.y) * 0.4;
-                Util.tmpVec.setValue(0, -(player.sync.wasd.x * turnSpeedScale) * deltaTime / 5 * Util.tankData[player.type].turnSpeed, 0);
+                Util.tmpVec.setValue(0, -player.sync.wasd.x * 1.6 * Util.tankData[player.type].turnSpeed, 0);
                 player.body.applyTorque(Util.tmpVec);
             }
         }
