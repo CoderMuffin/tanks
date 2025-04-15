@@ -190,21 +190,21 @@ class GameClient {
             if (this.players[id].physicsSyncAspiration) {
                 this.physics.lerpSync(this.players[id].body, this.players[id].physicsSyncAspiration, 0.03, 0.06);
             }
-            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
+            Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, 0.3);
         }
 
         for (var id in this.bullets) {
             if (this.bullets[id].physicsSyncAspiration) {
                 this.physics.lerpSync(this.bullets[id].body, this.bullets[id].physicsSyncAspiration, 0.03, 0.06);
             }
-            Util.updateModel(this.physics.ammo, this.bullets[id].body, this.bullets[id].model);
+            Util.updateModel(this.physics.ammo, this.bullets[id].body, this.bullets[id].model, 0.2);
         }
 
         for (var id in this.cubes) {
             if (this.cubes[id].physicsSyncAspiration) {
                 this.physics.lerpSync(this.cubes[id].body, this.cubes[id].physicsSyncAspiration, 0.01, 0.03);
             }
-            Util.updateModel(this.physics.ammo, this.cubes[id].body, this.cubes[id].model);
+            Util.updateModel(this.physics.ammo, this.cubes[id].body, this.cubes[id].model, 0.7);
         }
 
         for (var camera of this.cameras) {

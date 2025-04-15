@@ -137,6 +137,12 @@ class Physics {
             
             let p = this.tmpTrans.getOrigin();
             let old = { x: p.x(), y: p.y(), z: p.z() };
+            let largestDistance = Math.max(Math.abs(old.x - syncData.position.x), Math.abs(old.y - syncData.position.y), Math.abs(old.z - syncData.position.z));
+            if (largestDistance > 5) {
+                by = 1;
+                byRotation = 1;
+                console.warn("snapped");
+            }
             Util.lerpSyncVec(old, syncData.position, by);
             this.tmpVec.setValue(old.x, old.y, old.z);
             this.tmpTrans.setOrigin(this.tmpVec);
@@ -151,17 +157,10 @@ class Physics {
         }
 
         // hack: may need to delete this if it plays up
-
-        let vel = body.getLinearVelocity();
-        let oldVel = { x: vel.x(), y: vel.y(), z: vel.z() };
-        Util.lerpSyncVec(oldVel, syncData.velocity, by * 3);
-        this.tmpVec.setValue(oldVel.x, oldVel.y, oldVel.z);
+        
+        this.tmpVec.setValue(syncData.velocity.x, syncData.velocity.y, syncData.velocity.z);
         body.setLinearVelocity(this.tmpVec);
-
-        let angVel = body.getAngularVelocity();
-        let oldAngVel = { x: angVel.x(), y: angVel.y(), z: angVel.z() };
-        Util.lerpSyncVec(oldAngVel, syncData.angularVelocity, by * 3);
-        this.tmpVec.setValue(oldAngVel.x, oldAngVel.y, oldAngVel.z);
+        this.tmpVec.setValue(syncData.angularVelocity.x, syncData.angularVelocity.y, syncData.angularVelocity.z);
         body.setAngularVelocity(this.tmpVec);
     }
 }
