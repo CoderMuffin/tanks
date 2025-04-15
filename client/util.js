@@ -231,18 +231,18 @@ const Util = {
         ball.setLinearVelocity(new physics.ammo.btVector3(vel.x, vel.y, vel.z));
         return ball;
     },
-    updateModel(ammo, body, model, lerp=false) {
+    updateModel(ammo, body, model, lerp=null) {
         Util.prepareTmps(ammo);
         let ms = body.getMotionState();
         if (ms) {
             ms.getWorldTransform(Util.tmpTrans);
             let p = Util.tmpTrans.getOrigin();
             let q = Util.tmpTrans.getRotation();
-            if (lerp) {
+            if (lerp !== null) {
                 Util.tmpThreeVec.set(p.x(), p.y(), p.z());
                 Util.tmpThreeQuat.set(q.x(), q.y(), q.z(), q.w());
-                model.position.lerp(Util.tmpThreeVec, 0.3);
-                model.quaternion.slerp(Util.tmpThreeQuat, 0.3);
+                model.position.lerp(Util.tmpThreeVec, lerp);
+                model.quaternion.slerp(Util.tmpThreeQuat, lerp);
             } else {
                 model.position.set(p.x(), p.y(), p.z());
                 model.quaternion.set(q.x(), q.y(), q.z(), q.w());
