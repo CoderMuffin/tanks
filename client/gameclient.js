@@ -171,7 +171,11 @@ class GameClient {
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        this.physics.step(deltaTime);
+        this.physics.step(deltaTime, () => {
+            for (var id in this.players) {
+                this.players[id] = Util.stepPlayer(this.physics.ammo, this.players[id], deltaTime);
+            }
+        });
         requestAnimationFrame(() => this.animate());
 
         if (this.demoTank) {
@@ -179,22 +183,27 @@ class GameClient {
         }
         
         for (var id in this.players) {
-            this.players[id] = Util.stepPlayer(this.physics.ammo, this.players[id], deltaTime);
             if (this.cameras.length == 1) {
                 this.players[id].text.lookAt(this.cameras[0].camera.position);
                 this.players[id].emote.lookAt(this.cameras[0].camera.position);
             }
             if (this.players[id].physicsSyncAspiration) {
-                this.physics.lerpSync(this.players[id].body, this.players[id].physicsSyncAspiration, 0.01);
+                this.physics.lerpSync(this.players[id].body, this.players[id].physicsSyncAspiration, 0.03, 0.06);
             }
             Util.updateModel(this.physics.ammo, this.players[id].body, this.players[id].model, true);
         }
 
         for (var id in this.bullets) {
+            if (this.bullets[id].physicsSyncAspiration) {
+                this.physics.lerpSync(this.bullets[id].body, this.bullets[id].physicsSyncAspiration, 0.03, 0.06);
+            }
             Util.updateModel(this.physics.ammo, this.bullets[id].body, this.bullets[id].model);
         }
 
         for (var id in this.cubes) {
+            if (this.cubes[id].physicsSyncAspiration) {
+                this.physics.lerpSync(this.cubes[id].body, this.cubes[id].physicsSyncAspiration, 0.01, 0.03);
+            }
             Util.updateModel(this.physics.ammo, this.cubes[id].body, this.cubes[id].model);
         }
 
@@ -285,25 +294,34 @@ class GameClient {
                 continue;
             }
             
-            let forceSync = !this.localIDs.includes(remotePlayer.id) || remotePlayer.authoritative;
+            let isLocal = this.localIDs.includes(remotePlayer.id);
             
-            if (forceSync || true) {
+            if (remotePlayer.authoritative) { // server has claimed authority over this player
+                if (remotePlayer.shouldSnap) {
+                    this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
+                    this.players[remotePlayer.id].physicsSyncAspiration = null;
+                } else {
+                    this.players[remotePlayer.id].physicsSyncAspiration = remotePlayer.physicsSync;
+                }
+            } else if (isLocal) { // if it's us but we have authority, we should not be lerping
+                this.players[remotePlayer.id].physicsSyncAspiration = null;
+            }
+            
+            if (!isLocal) { // it's not authoritative and it's not local. we should lerp. separated from else to ensure that the sync property is copied over too.
                 this.players[remotePlayer.id].sync = remotePlayer.sync;
-                this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
-            } else {
-                //this.players[remotePlayer.id].physicsSyncAspiration = remotePlayer.physicsSync;
+                this.players[remotePlayer.id].physicsSyncAspiration = remotePlayer.physicsSync;
             }
         }
         for (var remoteBullet of syncData.bullets) {
             if (this.bullets[remoteBullet.id]) {
-                this.physics.setSync(this.bullets[remoteBullet.id].body, remoteBullet.sync);
+                this.bullets[remoteBullet.id].physicsSyncAspiration = remoteBullet.sync;
             } else {
                 console.warn(`No such bullet for id "${remoteBullet.id}"`)
             }
         }
         for (var remoteMoveableCube of syncData.moveableCubes) {
             if (this.cubes[remoteMoveableCube.id]) {
-                this.physics.setSync(this.cubes[remoteMoveableCube.id].body, remoteMoveableCube.sync);
+                this.cubes[remoteMoveableCube.id].physicsSyncAspiration = remoteMoveableCube.sync;
             } else {
                 console.warn(`No such cube for id "${remoteMoveableCube.id}"`)
             }
@@ -345,6 +363,7 @@ class GameClient {
         }
         for (var player of syncData.players) {
             this.createPlayer(player);
+            this.physics.setSync(this.players[player.id].body, player.physicsSync);
         }
         Util.addCubeBodies(this.physics, Object.values(this.cubes), this.scene);
         for (var remoteMoveableCube of syncData.moveableCubes) {

@@ -22,7 +22,7 @@ class GameServer {
         this.ready = true;
 
         this.intervals = [
-            setInterval(() => this.sync(), 250),
+            setInterval(() => this.sync(), 200),
             setInterval(() => this.step(), 16)
         ];
 
@@ -53,6 +53,7 @@ class GameServer {
         return (new Array(16)).fill().map(_ => Math.floor(Math.random() * 16).toString(16)).join("");
     }
     addPlayer(socket, name, color, type) {
+        let self = this;
         let localID = this.generateID();
         let player = {
             body: Util.newPlayerBody(this.physics, type),
@@ -88,7 +89,8 @@ class GameServer {
                         type: player.type,
                         name: player.name,
                         score: player.score,
-                        local: localID == player.id
+                        local: localID == player.id,
+                        physicsSync: self.physics.getSync(player.body)
                     };
                 })
             });
@@ -168,8 +170,10 @@ class GameServer {
         let syncData = {
             players: Object.values(this.players).map(function(player) {
                 let physicsSync = self.physics.getSync(player.body);
+                let fellOff = false;
                 
                 if (physicsSync && physicsSync.position.y <= -10) {
+                    fellOff = true;
                     physicsSync.position = { x: 0, y: 0, z: 0 };
                     physicsSync.rotation = { x: 0, y: 0, z: 0, w: 1 };
                     self.physics.setSync(player.body, physicsSync);
@@ -182,15 +186,16 @@ class GameServer {
                     
                     scoreData.push([player.id, player.score, player.lastHitBy, firer ? firer.score : 0]);
                     player.lastHitBy = null;
-                    player.lastControlLoss = Date.now();
+                    player.lastControlLoss = 0;
                 }
                 let syncData = {
                     id: player.id,
                     sync: player.sync,
                     physicsSync: physicsSync
                 };
-                if (!self.inControl(player)) {
+                if (fellOff || !self.inControl(player)) {
                     syncData.authoritative = true;
+                    syncData.shouldSnap = fellOff;
                 }
                 return syncData;
             }),
@@ -207,7 +212,7 @@ class GameServer {
         }
     }
     inControl(player) {
-        return Date.now() - player.lastControlLoss > 2000;
+        return Date.now() - player.lastControlLoss > 500;
     }
     spawnBullet(player) {
         let bulletID = this.generateID();
