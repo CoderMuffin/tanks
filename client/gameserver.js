@@ -112,7 +112,8 @@ class GameServer {
         let self = this;
         return this.moveableCubes.reduce(function(acc, cube) {
             let sync = self.physics.getSync(cube.body);
-            if (all || (cube.body.isActive() && sync.position.y >= -10)) {
+            let activityMagnitudeSum = Math.abs(sync.velocity.x) + Math.abs(sync.velocity.y) + Math.abs(sync.velocity.z) + Math.abs(sync.angularVelocity.x) + Math.abs(sync.angularVelocity.y) + Math.abs(sync.angularVelocity.z);
+            if (all || (activityMagnitudeSum > 0.01 && cube.body.isActive() && sync.position.y >= -10)) {
                 acc.push({
                     id: cube.id,
                     sync: sync
