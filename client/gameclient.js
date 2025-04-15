@@ -4,6 +4,8 @@ class GameClient {
         this.tankGeometry = resources.tankGeometry;
         this.elDebug = document.getElementById("debug");
         this.debug = {
+            frames: 0,
+            frameRate: 0,
             cubes: 0,
         };
         this.emotes = resources.emotes;
@@ -35,6 +37,11 @@ class GameClient {
                 }
             }, 3000);
         }
+
+        setInterval(function() {
+            self.debug.frameRate = Math.round(self.debug.frames / 3);
+            self.debug.frames = 0;
+        }, 2000);
 
         this.lastTime = Date.now();
         this.animate();
@@ -157,11 +164,13 @@ class GameClient {
     }
 
     animate() {
+        this.debug.frames++;
+
         let now = Date.now();
         let deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        this.elDebug.innerText = `fps ${Math.round(1/deltaTime*1000)} cubes ${this.debug.cubes}`;
+        this.elDebug.innerText = `fps ${this.debug.frameRate} cubes ${this.debug.cubes}`;
         this.physics.step(deltaTime);
         requestAnimationFrame(() => this.animate());
 
@@ -278,7 +287,7 @@ class GameClient {
             
             let forceSync = !this.localIDs.includes(remotePlayer.id) || remotePlayer.authoritative;
             
-            if (forceSync) {
+            if (forceSync || true) {
                 this.players[remotePlayer.id].sync = remotePlayer.sync;
                 this.physics.setSync(this.players[remotePlayer.id].body, remotePlayer.physicsSync);
             } else {
