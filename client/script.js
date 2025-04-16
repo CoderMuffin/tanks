@@ -80,7 +80,11 @@ function registerMobileButtons() {
     };
     grid.addEventListener("touchmove", onmove);
     grid.addEventListener("touchstart", onmove);
-    grid.addEventListener("touchend", () => updateWasd({ x: 0, y: 0 }));
+    document.body.addEventListener("touchend", () => {
+        wasd.x = 0;
+        wasd.y = 0;
+        updateWasd(wasd);
+    });
     
     let shootButton = document.getElementById("mobile-button-shoot");
     shootButton.addEventListener("touchstart", function() {
