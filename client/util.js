@@ -66,13 +66,14 @@ const Util = {
         let w = q.w();
         out.setValue(2 * (x*z + w*y), 2 * (y*z - w*x), 1 - 2 * (x*x + y*y));
     },
-    newPlayerBody(physics, type) {
+    newPlayerBody(physics, type, collisionLayer) {
         let box = physics.box(
             new physics.ammo.btVector3(0, 0, 0),
             new physics.ammo.btQuaternion(0, 0, 0, 1),
             new physics.ammo.btVector3(0.3, 0.25, 0.5),
             Util.tankData[type].weight,
-            true
+            true,
+            1 << collisionLayer,
         );
         
         box.setFriction(0);
@@ -218,7 +219,7 @@ const Util = {
 
 		return from;
     },
-    spawnBullet(physics, from, vel, mass) {
+    spawnBullet(physics, from, vel, mass, firerCollisionLayer) {
         Util.prepareTmps(physics.ammo);
         Util.tmpVec.setValue(from.x, from.y, from.z);
         Util.tmpQuat.setValue(0, 0, 0, 1);
@@ -226,7 +227,10 @@ const Util = {
             Util.tmpVec,
             Util.tmpQuat,
             Util.bulletSize(mass),
-            mass
+            mass,
+            false,
+            1, // default
+            ~(1 << firerCollisionLayer),
         );
         ball.setLinearVelocity(new physics.ammo.btVector3(vel.x, vel.y, vel.z));
         return ball;
