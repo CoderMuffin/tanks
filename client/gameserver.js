@@ -52,11 +52,26 @@ class GameServer {
     generateID() {
         return (new Array(16)).fill().map(_ => Math.floor(Math.random() * 16).toString(16)).join("");
     }
+    getUnusedPhysicsLayer() {
+        let freeMasks = new Array(32).fill(true);
+        freeMasks[0] = false; // 0 results in no collision
+        freeMasks[1] = false; // 1 is the default collision layer
+        for (var id in this.players) {
+            freeMasks[this.players[id].collisionLayer] = false;
+        }
+        for (var i = 0; i < freeMasks.length; i++) {
+            if (freeMasks[i]) {
+                return i;
+            }
+        }
+        return 0;
+    }
     addPlayer(socket, name, color, type) {
         let self = this;
         let localID = this.generateID();
+        let collisionLayer = this.getUnusedPhysicsLayer();
         let player = {
-            body: Util.newPlayerBody(this.physics, type),
+            body: Util.newPlayerBody(this.physics, type, collisionLayer),
             shooting: false,
             ammoCooldown: false,
             ammo: Util.tankData[type].ammo,
@@ -67,6 +82,7 @@ class GameServer {
             color: color,
             type: type,
             name: name,
+            collisionLayer: collisionLayer,
             sync: {
                 wasd: { x: 0, y: 0 },
                 hp: 5,
@@ -89,6 +105,7 @@ class GameServer {
                         type: player.type,
                         name: player.name,
                         score: player.score,
+                        collisionLayer: player.collisionLayer,
                         local: localID == player.id,
                         physicsSync: self.physics.getSync(player.body)
                     };
@@ -254,15 +271,13 @@ class GameServer {
             });
         }
         
-        let ball = Util.spawnBullet(this.physics, from, vel, mass);
+        let ball = Util.spawnBullet(this.physics, from, vel, mass, player.collisionLayer);
         this.bullets.push({
             id: bulletID,
             body: ball,
             mass: mass,
             firer: player.id
         });
-        player.body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
-        ball.setIgnoreCollisionCheck(player.body, true); //stop firer from hitting themself
         let self = this;
         setTimeout(function() {
             let bulletIndex = self.bullets.findIndex(bullet => bullet.id == bulletID);

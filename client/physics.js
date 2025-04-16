@@ -20,7 +20,7 @@ class Physics {
     //quaternion: btQuaternion
     //scale: btVector3
     //mass: number
-    box(position, rotation, scale, mass, alwaysAwake = false) {
+    box(position, rotation, scale, mass, alwaysAwake = false, collisionLayerMask=1, collideWithMask=-1) {
         let transform = new Ammo.btTransform();
         transform.setIdentity();
         transform.setOrigin(position);
@@ -38,10 +38,10 @@ class Physics {
         if (alwaysAwake) {
             body.setActivationState(4);
         }
-        this.physicsWorld.addRigidBody(body);
+        this.physicsWorld.addRigidBody(body, collisionLayerMask, collideWithMask);
         return body;
     }
-    ball(position, rotation, radius, mass, alwaysAwake = false) {
+    ball(position, rotation, radius, mass, alwaysAwake = false, collisionLayerMask=1, collideWithMask=-1) {
         let transform = new Ammo.btTransform();
         transform.setIdentity();
         transform.setOrigin(position);
@@ -60,12 +60,12 @@ class Physics {
         body.setFriction(4);
         body.setRollingFriction(10);
         body.setCcdMotionThreshold(0.001);
-        body.setCcdSweptSphereRadius(0.2);
+        body.setCcdSweptSphereRadius(radius);
 
         if (alwaysAwake) {
             body.setActivationState(4);
         }
-        this.physicsWorld.addRigidBody(body);
+        this.physicsWorld.addRigidBody(body, collisionLayerMask, collideWithMask);
         return body;
     }
     step(deltaTime, onStep) {

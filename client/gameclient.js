@@ -143,7 +143,7 @@ class GameClient {
     }
 
     spawnBullet(data) {
-        let ball = Util.spawnBullet(this.physics, data.from, data.vel, data.mass);
+        let ball = Util.spawnBullet(this.physics, data.from, data.vel, data.mass, this.players[data.firer].collisionLayer);
 
         let geometry = new THREE.SphereGeometry(Util.bulletSize(data.mass));
         let material = new THREE.MeshPhongMaterial({ color: data.color });
@@ -155,8 +155,6 @@ class GameClient {
             model: mesh
         }
         let self = this;
-        this.players[data.firer].body.setIgnoreCollisionCheck(ball, true); //stop firer from hitting themself
-        ball.setIgnoreCollisionCheck(this.players[data.firer].body, true); //stop firer from hitting themself
         setTimeout(function() {
             self.physics.remove(self.bullets[data.id].body);
             self.scene.remove(self.bullets[data.id].model);
@@ -260,7 +258,8 @@ class GameClient {
             color: data.color,
             type: data.type,
             score: data.score,
-            body: Util.newPlayerBody(this.physics, data.type),
+            collisionLayer: data.collisionLayer,
+            body: Util.newPlayerBody(this.physics, data.type, data.collisionLayer),
             lastFetched: Date.now(),
             sync: {
                 wasd: { x: 0, y: 0 },
