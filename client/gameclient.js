@@ -39,8 +39,7 @@ class GameClient {
         }
 
         setInterval(function() {
-            self.debug.frameRate = self.debug.frames;
-            self.elDebug.innerText = `fps ${self.debug.frameRate} cubes ${self.debug.cubes}`;
+            self.elDebug.innerText = `fps ${self.debug.frames} cubes ${self.debug.cubes}`;
             self.debug.frames = 0;
         }, 1000);
 
@@ -73,7 +72,7 @@ class GameClient {
         }
     }
     
-    initTHREE(multiplayer) {
+    initTHREE() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x00c8ff);
         this.threeTmp = {

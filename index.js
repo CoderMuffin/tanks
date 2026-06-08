@@ -19,21 +19,25 @@ app.get('/', (req, res) => {
 app.use(express.static(__dirname + "/client"));
 
 io.on('connection', (socket) => {
+    let game = null;
     let gameID = null;
     let playerID = null;
 
     function joinGame(data) {
-        let game = games.get(data.id.toString());
-        if (game == null) {
+        let gameToJoin = games.get(data.id.toString());
+        if (gameToJoin == null) {
             socket.emit("failure", `Cannot join game "${data.id}": game doesn't exist!`);
             return;
         }
+
         try {
             clearInterval(game.dcTimeout);
             console.log(`[${new Date()}] Cancelled closure of game "${data.id}"`);
         } catch { };
-        playerID = game.addPlayer(socket, data.name.toString(), parseInt(data.color.replace("#", ""), 16), data.type);
+
+        playerID = gameToJoin.addPlayer(socket, data.name.toString(), parseInt(data.color.replace("#", ""), 16), data.type);
         gameID = data.id;
+        game = gameToJoin;
     }
 
     function emit(game, message, data) {
@@ -90,14 +94,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on("spawn-bullet-start", function() {
-        let game = games.get(gameID);
         if (game == null) return;
 
         game.players[playerID].shooting = true;
     });
 
     socket.on("spawn-bullet-end", function() {
-        let game = games.get(gameID);
         if (game == null) return;
         
         game.players[playerID].shooting = false;
@@ -112,27 +114,23 @@ io.on('connection', (socket) => {
     });
 
     socket.on("update-wasd", function(data) {
-        let game = games.get(gameID);
         if (game == null) return;
 
         let player = game.players[playerID];
         if (!player) return;
         player.sync.wasd = data.wasd;
         if (game.inControl(player)) {
-            //game.physics.lerpSync(player.body, data.sync, 0.2);
             game.physics.setSync(player.body, data.sync);
         }
     });
 
     socket.on("emote", function(emote) {
-        let game = games.get(gameID);
         if (game == null) return;
         
         emit(game, "emote", { id: playerID, emote: emote });
     })
 
     socket.on("spawn-bullet", function() {
-        let game = games.get(gameID);
         if (game == null) return;
 
         game.spawnBullet(playerID);

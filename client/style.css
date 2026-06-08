@@ -48,11 +48,13 @@ html, body {
     height: 16px;
     width: 16px;
     margin-right: 8px;
+    flex-shrink: 0;
     background-color: var(--color);
 }
 
 .leaderboard-name {
     color: white;
+    overflow-wrap: break-word;
 }
 
 .leaderboard-score {
@@ -151,8 +153,8 @@ html, body {
 
 .dialog-container, #help-dialog-inner {
     min-width: 300px;
-    width: 50vw;
-    max-width: 500px
+    width: 70vw;
+    max-width: 700px;
 }
 
 .center-title {
